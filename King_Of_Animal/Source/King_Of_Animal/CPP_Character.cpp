@@ -1,12 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Components/CapsuleComponent.h"
+#include "King_Of_AnimalGameMode.h"
 #include "CPP_Character.h"
 
 // Sets default values
 ACPP_Character::ACPP_Character()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	bUseControllerRotationPitch = false;
@@ -14,7 +15,7 @@ ACPP_Character::ACPP_Character()
 	bUseControllerRotationYaw = false;
 
 	GetCharacterMovement()->bOrientRotationToMovement = false;
-	
+
 
 	//CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	//CameraBoom->SetupAttachment(RootComponent);
@@ -24,62 +25,67 @@ ACPP_Character::ACPP_Character()
 	//PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCamera"));
 	//PlayerCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 
+
+	characterState = ECharacterState::VE_Default;
+	opponent = nullptr;
 	PK_Check = true;
 	IsDown = false;
 	MaxHealth = CurrentHealth;
 
 	transform = FTransform();
 	scale = FVector(0.0f, 0.0f, 0.0f);
+
 	isFlipped = false;
-	//isPlayer_1_2 = false;
+	maxDistanceApart = 800.0f;
+
 }
 
 // Called when the game starts or when spawned
 void ACPP_Character::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
 void ACPP_Character::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if (opponent)
-	{
-		if (auto characterMovement = GetCharacterMovement())
+	if (characterState != ECharacterState::VE_Jumping) {
+		if (opponent)
 		{
-			if (auto enemyMovement = opponent->GetCharacterMovement())
+			if (auto characterMovement = GetCharacterMovement())
 			{
-				if (enemyMovement->GetActorLocation().Y >= characterMovement->GetActorLocation().Y)
+				if (auto enemyMovement = opponent->GetCharacterMovement())
 				{
-					if (isFlipped)
+					if (enemyMovement->GetActorLocation().Y <= characterMovement->GetActorLocation().Y)
 					{
-						if (auto mesh = GetCapsuleComponent()->GetChildComponent(1))
+						if (isFlipped)
 						{
-							transform = mesh->GetRelativeTransform();
-							scale = transform.GetScale3D();
-							scale.Y = -0.3f;
-							transform.SetScale3D(scale);
-							mesh->SetRelativeTransform(transform);
+							if (auto mesh = GetCapsuleComponent()->GetChildComponent(1))
+							{
+								transform = mesh->GetRelativeTransform();
+								scale = transform.GetScale3D();
+								scale.Y = -0.3f;
+								transform.SetScale3D(scale);
+								mesh->SetRelativeTransform(transform);
+							}
+							isFlipped = false;
 						}
-						isFlipped = false;
 					}
-				}
-				else
-				{
-					if (!isFlipped)
+					else
 					{
-						if (auto mesh = GetCapsuleComponent()->GetChildComponent(1))
+						if (!isFlipped)
 						{
-							transform = mesh->GetRelativeTransform();
-							scale = transform.GetScale3D();
-							scale.Y = 0.3f;
-							transform.SetScale3D(scale);
-							mesh->SetRelativeTransform(transform);
+							if (auto mesh = GetCapsuleComponent()->GetChildComponent(1))
+							{
+								transform = mesh->GetRelativeTransform();
+								scale = transform.GetScale3D();
+								scale.Y = 0.3f;
+								transform.SetScale3D(scale);
+								mesh->SetRelativeTransform(transform);
+							}
+							isFlipped = true;
 						}
-						isFlipped = true;
 					}
 				}
 			}
@@ -92,42 +98,77 @@ void ACPP_Character::Tick(float DeltaTime)
 void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	if (!isPlayer_1_2) {
-		PlayerInputComponent->BindAction("JumpP1", IE_Pressed, this, &ACharacter::Jump);
-		PlayerInputComponent->BindAction("JumpP1", IE_Released, this, &ACharacter::StopJumping);
+	if (auto gameMode = Cast<AKing_Of_AnimalGameMode>(GetWorld()->GetAuthGameMode())) {
+		if (gameMode->player1 == this) 
+		{
+			PlayerInputComponent->BindAction("JumpP1", IE_Pressed, this, &ACharacter::Jump);
+			PlayerInputComponent->BindAction("JumpP1", IE_Released, this, &ACharacter::StopJumping);
 
-		PlayerInputComponent->BindAxis("MoveRight_P1", this, &ACPP_Character::MoveRight);
-		// 때리기
-		PlayerInputComponent->BindAction("L_Punch_P1", IE_Pressed, this, &ACPP_Character::L_Punch);
-		PlayerInputComponent->BindAction("R_Punch_P1", IE_Pressed, this, &ACPP_Character::R_Punch);
-		PlayerInputComponent->BindAction("L_Kick_P1", IE_Pressed, this, &ACPP_Character::L_Kick);
-		PlayerInputComponent->BindAction("R_Kick_P1", IE_Pressed, this, &ACPP_Character::R_Kick);
-	}
-	else
-	{
-		PlayerInputComponent->BindAction("JumpP2", IE_Pressed, this, &ACharacter::Jump);
-		PlayerInputComponent->BindAction("JumpP2", IE_Released, this, &ACharacter::StopJumping);
+			PlayerInputComponent->BindAxis("MoveRight_P1", this, &ACPP_Character::MoveRight);
+			// 때리기
+			PlayerInputComponent->BindAction("L_Punch_P1", IE_Pressed, this, &ACPP_Character::L_Punch);
+			PlayerInputComponent->BindAction("R_Punch_P1", IE_Pressed, this, &ACPP_Character::R_Punch);
+			PlayerInputComponent->BindAction("L_Kick_P1", IE_Pressed, this, &ACPP_Character::L_Kick);
+			PlayerInputComponent->BindAction("R_Kick_P1", IE_Pressed, this, &ACPP_Character::R_Kick);
+		}
+		else
+		{
+			PlayerInputComponent->BindAction("JumpP2", IE_Pressed, this, &ACharacter::Jump);
+			PlayerInputComponent->BindAction("JumpP2", IE_Released, this, &ACharacter::StopJumping);
 
-		PlayerInputComponent->BindAxis("MoveRight_P2", this, &ACPP_Character::MoveRight);
-		// 때리기
-		PlayerInputComponent->BindAction("L_Punch_P2", IE_Pressed, this, &ACPP_Character::L_Punch);
-		PlayerInputComponent->BindAction("R_Punch_P2", IE_Pressed, this, &ACPP_Character::R_Punch);
-		PlayerInputComponent->BindAction("L_Kick_P2", IE_Pressed, this, &ACPP_Character::L_Kick);
-		PlayerInputComponent->BindAction("R_Kick_P2", IE_Pressed, this, &ACPP_Character::R_Kick);
+			PlayerInputComponent->BindAxis("MoveRight_P2", this, &ACPP_Character::MoveRight);
+			// 때리기
+			PlayerInputComponent->BindAction("L_Punch_P2", IE_Pressed, this, &ACPP_Character::L_Punch);
+			PlayerInputComponent->BindAction("R_Punch_P2", IE_Pressed, this, &ACPP_Character::R_Punch);
+			PlayerInputComponent->BindAction("L_Kick_P2", IE_Pressed, this, &ACPP_Character::L_Kick);
+			PlayerInputComponent->BindAction("R_Kick_P2", IE_Pressed, this, &ACPP_Character::R_Kick);
+		}
 	}
+
 }
 
 void ACPP_Character::MoveRight(float axis)
 {
-	if (!IsDown) 
+	if (!IsDown)
 	{
-		AddMovementInput(GetActorForwardVector(), axis);
+
+		float currentDistanceApart = abs(opponent->GetActorLocation().Y - GetActorLocation().Y);
+
+		if ((currentDistanceApart >= maxDistanceApart))
+		{
+			if ((currentDistanceApart + axis < currentDistanceApart ) || (currentDistanceApart - axis < currentDistanceApart ))
+			{
+				AddMovementInput(GetActorForwardVector(), axis);
+			}
+		}
+		else
+		{
+			AddMovementInput(GetActorForwardVector(), axis);
+		}
+
 	}
+}
+
+void ACPP_Character::Jump()
+{
+	if (!IsDown)
+	{
+		ACharacter::Jump();
+		characterState = ECharacterState::VE_Jumping;
+	}
+}
+
+void ACPP_Character::StopJumping()
+{
+	
+	ACharacter::StopJumping();
+	//characterState = ECharacterState::VE_Default;
+	
 }
 
 void ACPP_Character::L_Punch()
 {
-	if (l_punch && PK_Check && !IsDown)
+	if (l_punch && !IsDown)
 	{
 		PlayAnimMontage(l_punch, 1, NAME_None);
 		PK_Check = false;
@@ -136,7 +177,7 @@ void ACPP_Character::L_Punch()
 
 void ACPP_Character::R_Punch()
 {
-	if (r_punch && PK_Check && !IsDown)
+	if (r_punch && !IsDown)
 	{
 		PlayAnimMontage(r_punch, 1, NAME_None);
 		PK_Check = false;
@@ -145,7 +186,7 @@ void ACPP_Character::R_Punch()
 
 void ACPP_Character::L_Kick()
 {
-	if (l_kick && PK_Check && !IsDown)
+	if (l_kick && !IsDown)
 	{
 		PlayAnimMontage(l_kick, 1, NAME_None);
 		PK_Check = false;
@@ -154,7 +195,7 @@ void ACPP_Character::L_Kick()
 
 void ACPP_Character::R_Kick()
 {
-	if (r_kick && PK_Check && !IsDown)
+	if (r_kick && !IsDown)
 	{
 		PlayAnimMontage(r_kick, 1, NAME_None);
 		PK_Check = false;
@@ -168,10 +209,10 @@ void ACPP_Character::PunchReast()
 
 void ACPP_Character::TakeDamage(float damageAmount)
 {
-	
+
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Damege"));
 	MaxHealth -= damageAmount;
-	
+
 	if (MaxHealth <= 0.0f)
 	{
 		MaxHealth = 0.0f;
@@ -230,7 +271,9 @@ void ACPP_Character::CheckPunch_Implementation(bool is_leftHand)
 		handLocation = GetMesh()->GetBoneLocation("RightHand", EBoneSpaces::WorldSpace);
 	}
 
-	FName hitBone = opponent->GetClosestBone(handLocation, 80);
+
+	hitBone = opponent->GetClosestBone(handLocation, 80);
+
 
 	if (hitBone != "" && !IsDown)
 	{
@@ -253,14 +296,15 @@ void ACPP_Character::CheckKick_Implementation(bool is_leftLeg)
 		LegLocation = GetMesh()->GetBoneLocation("RightLeg", EBoneSpaces::WorldSpace);
 	}
 
-	FName hitBone = opponent->GetClosestBone(LegLocation, 80);
+
+	hitBone = opponent->GetClosestBone(LegLocation, 80);
+
 
 	if (hitBone != "" && !IsDown)
 	{
 		opponent->PunchReast();
-		TakeDamage(10.0f);
+		opponent->TakeDamage(10.0f);
 	}
-	
 }
 
 
@@ -283,7 +327,7 @@ FName ACPP_Character::GetClosestBone(FVector hitBonelocation, float maxDistance)
 			closestBone = boneNames[i];
 		}
 	}
-	
+
 	if (minDist < maxDistance)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, closestBone.ToString());
@@ -294,7 +338,7 @@ FName ACPP_Character::GetClosestBone(FVector hitBonelocation, float maxDistance)
 	{
 		return "";
 	}
-	
+
 }
 
 void ACPP_Character::CheckAttack_Implementation()

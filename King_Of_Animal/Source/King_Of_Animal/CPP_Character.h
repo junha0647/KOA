@@ -11,6 +11,13 @@
 
 #include "CPP_Character.generated.h"
 
+UENUM(BlueprintType)
+enum class ECharacterState : uint8
+{
+	VE_Default   UMETA(DisplayName = "NOT_MOVING"),
+	VE_Jumping   UMETA(DisplayName = "JUMPING")
+};
+
 UCLASS()
 class KING_OF_ANIMAL_API ACPP_Character : public ACharacter, public IFightInterface
 {
@@ -27,7 +34,8 @@ protected:
 	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	//UCameraComponent* PlayerCamera;
 
-
+	virtual void Jump() override;
+	virtual void StopJumping() override;
 	void MoveRight(float axis);
 	void L_Punch();
 	void R_Punch();
@@ -66,13 +74,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
 	UAnimMontage* l_punchReact;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SceneReferences")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player References")
 	ACPP_Character* opponent;
-
+	
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Model")
 	FTransform transform;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Model")
 	FVector scale;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+		ECharacterState characterState;
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Check")
@@ -90,7 +102,13 @@ public:
 	bool isFlipped;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player_Choice")
-		bool isPlayer_1_2;
+	bool isPlayer_1_2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
+	float maxDistanceApart;
+
+public:
+	FName hitBone;
 	
 
 protected:
