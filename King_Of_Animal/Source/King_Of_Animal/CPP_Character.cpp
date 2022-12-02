@@ -28,16 +28,18 @@ ACPP_Character::ACPP_Character()
 
 	characterState = ECharacterState::VE_Default;
 	opponent = nullptr;
-	PK_Check = true;
-	IsDown = false;
-	MaxHealth = CurrentHealth;
-
 	transform = FTransform();
 	scale = FVector(0.0f, 0.0f, 0.0f);
 
-	isFlipped = false;
 	maxDistanceApart = 800.0f;
+	MaxHealth = CurrentHealth;
+	stunTime = 0.0f;
 
+	PK_Check = true;
+	canMove = true;
+	isFlipped = false;
+	IsDie = false;
+	
 }
 
 // Called when the game starts or when spawned
@@ -129,7 +131,7 @@ void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 void ACPP_Character::MoveRight(float axis)
 {
-	if (!IsDown)
+	if (canMove)
 	{
 
 		float currentDistanceApart = abs(opponent->GetActorLocation().Y - GetActorLocation().Y);
@@ -151,7 +153,7 @@ void ACPP_Character::MoveRight(float axis)
 
 void ACPP_Character::Jump()
 {
-	if (!IsDown)
+	if (canMove)
 	{
 		ACharacter::Jump();
 		characterState = ECharacterState::VE_Jumping;
@@ -160,15 +162,12 @@ void ACPP_Character::Jump()
 
 void ACPP_Character::StopJumping()
 {
-	
 	ACharacter::StopJumping();
-	//characterState = ECharacterState::VE_Default;
-	
 }
 
 void ACPP_Character::L_Punch()
 {
-	if (l_punch && !IsDown)
+	if (l_punch && canMove)
 	{
 		PlayAnimMontage(l_punch, 1, NAME_None);
 		PK_Check = false;
@@ -177,7 +176,7 @@ void ACPP_Character::L_Punch()
 
 void ACPP_Character::R_Punch()
 {
-	if (r_punch && !IsDown)
+	if (r_punch && canMove)
 	{
 		PlayAnimMontage(r_punch, 1, NAME_None);
 		PK_Check = false;
@@ -186,7 +185,7 @@ void ACPP_Character::R_Punch()
 
 void ACPP_Character::L_Kick()
 {
-	if (l_kick && !IsDown)
+	if (l_kick && canMove)
 	{
 		PlayAnimMontage(l_kick, 1, NAME_None);
 		PK_Check = false;
@@ -195,7 +194,7 @@ void ACPP_Character::L_Kick()
 
 void ACPP_Character::R_Kick()
 {
-	if (r_kick && !IsDown)
+	if (r_kick && canMove)
 	{
 		PlayAnimMontage(r_kick, 1, NAME_None);
 		PK_Check = false;
@@ -207,18 +206,35 @@ void ACPP_Character::PunchReast()
 	PlayAnimMontage(l_punchReact, 1, NAME_None);
 }
 
-void ACPP_Character::TakeDamage(float damageAmount)
+void ACPP_Character::TakeDamage(float damageAmount, float hitstunTime)
 {
-
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Damege"));
 	MaxHealth -= damageAmount;
 
+	characterState = ECharacterState::VE_Stunned;
+	stunTime = hitstunTime;
+	if (!IsDie) 
+	{
+		BeginStun();
+	}
 	if (MaxHealth <= 0.0f)
 	{
 		MaxHealth = 0.0f;
-		IsDown = true;
-		GetCharacterMovement()->JumpZVelocity = 0.f;
+		canMove = false;
+		IsDie = true;
 	}
+}
+
+void ACPP_Character::BeginStun()
+{
+	canMove = false;
+	GetWorld()->GetTimerManager().SetTimer(stunTimerHandle, this, &ACPP_Character::EndStun, stunTime, false);
+}
+
+void ACPP_Character::EndStun()
+{
+	characterState = ECharacterState::VE_Default;
+	canMove = true;
 }
 
 void ACPP_Character::MoveRight_P2(float value)
@@ -275,10 +291,10 @@ void ACPP_Character::CheckPunch_Implementation(bool is_leftHand)
 	hitBone = opponent->GetClosestBone(handLocation, 80);
 
 
-	if (hitBone != "" && !IsDown)
+	if (hitBone != "" && canMove)
 	{
 		opponent->PunchReast();
-		opponent->TakeDamage(10.0f);
+		opponent->TakeDamage(10.0f, 0.5f);
 	}
 }
 
@@ -300,10 +316,10 @@ void ACPP_Character::CheckKick_Implementation(bool is_leftLeg)
 	hitBone = opponent->GetClosestBone(LegLocation, 80);
 
 
-	if (hitBone != "" && !IsDown)
+	if (hitBone != "" && canMove)
 	{
 		opponent->PunchReast();
-		opponent->TakeDamage(10.0f);
+		opponent->TakeDamage(10.0f, 0.5f);
 	}
 }
 
@@ -346,6 +362,6 @@ void ACPP_Character::CheckAttack_Implementation()
 	PK_Check = true;
 }
 
-// end of fight interface
+
 
 

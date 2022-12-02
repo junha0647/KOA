@@ -15,7 +15,9 @@ UENUM(BlueprintType)
 enum class ECharacterState : uint8
 {
 	VE_Default   UMETA(DisplayName = "NOT_MOVING"),
-	VE_Jumping   UMETA(DisplayName = "JUMPING")
+	VE_Jumping   UMETA(DisplayName = "JUMPING"),
+	VE_Stunned   UMETA(DisplayName = "STUNNED"),
+	VE_Blocking  UMETA(DisplayName = "BLOCKING")
 };
 
 UCLASS()
@@ -27,22 +29,26 @@ protected:
 	// Sets default values for this character's properties
 	ACPP_Character();
 
-	
-	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-	//USpringArmComponent* CameraBoom;
 
-	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-	//UCameraComponent* PlayerCamera;
-
+	// Player Jump
 	virtual void Jump() override;
 	virtual void StopJumping() override;
+	// Player Move
 	void MoveRight(float axis);
+	// Player attack
 	void L_Punch();
 	void R_Punch();
 	void L_Kick();
 	void R_Kick();
+	// player Hit
 	void PunchReast();
-	void TakeDamage(float damageAmount);
+	// Damage the play
+	void TakeDamage(float damageAmount, float hitstunTime);
+	//Enter the stun-state
+	void BeginStun();
+	//Exit the stun-state
+	void EndStun();
+
 
 	// Player 2
 	UFUNCTION(BlueprintCallable)
@@ -60,9 +66,12 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void StopJump_P2();
 
+
+
 	FName GetClosestBone(FVector hitBonelocation, float maxDistance);
 
 public:
+	// player AnimMontage
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
 	UAnimMontage* l_punch;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
@@ -77,39 +86,53 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player References")
 	ACPP_Character* opponent;
 	
-	
+	// the character's transform.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Model")
 	FTransform transform;
+
+	// The character's scale
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Model")
 	FVector scale;
 
+	// The current state of the character (jumping, stun, and more)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-		ECharacterState characterState;
+	ECharacterState characterState;
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Check")
 	bool PK_Check;
 
+	// player Move State Check
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Check")
-	bool IsDown;
+	bool canMove;
 
+	// player Die Check
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Check")
+	bool IsDie;
+
+	// The amount of health the character currently has.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 	float MaxHealth;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 	float CurrentHealth = 100.0f;
 
+	// Player Flip check and change
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Model")
 	bool isFlipped;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player_Choice")
-	bool isPlayer_1_2;
-
+	// The maximum amount of distance that the characters can be apart.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
 	float maxDistanceApart;
+
+	// The amount of thim the character will be stunned.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float stunTime;
 
 public:
 	FName hitBone;
 	
+	// The timer handle for all stuns
+	FTimerHandle stunTimerHandle;
 
 protected:
 	// Called when the game starts or when spawned
