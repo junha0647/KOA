@@ -17,7 +17,10 @@ enum class ECharacterState : uint8
 	VE_Default   UMETA(DisplayName = "NOT_MOVING"),
 	VE_Jumping   UMETA(DisplayName = "JUMPING"),
 	VE_Stunned   UMETA(DisplayName = "STUNNED"),
-	VE_Blocking  UMETA(DisplayName = "BLOCKING")
+	VE_Blocking  UMETA(DisplayName = "BLOCKING"),
+	VE_Crouching UMETA(DisplayName = "CROUCHING"),
+	VE_Dead      UMETA(DisplayName = "DEAD"),
+	VE_Launched  UMETA(DisplayName = "LAUNCHED")
 };
 
 UCLASS()
@@ -40,15 +43,32 @@ protected:
 	void R_Punch();
 	void L_Kick();
 	void R_Kick();
+	void Uppercut();
 	// player Hit
 	void PunchReast();
 	// Damage the play
-	void TakeDamage(float damageAmount, float hitstunTime);
+	void TakeDamage(float damageAmount, float hitstunTime, float blockstunTime, float pushbackAmount, float launchAmount);
 	//Enter the stun-state
 	void BeginStun();
 	//Exit the stun-state
 	void EndStun();
+	// Determin how for the characters should be pushed back
+	void PerformPushback(float pushbackAmount, float launchAmount, bool hasBlocked);
 
+	// Character crouching
+	UFUNCTION(BlueprintCallable)
+	void StartCrouching();
+	UFUNCTION(BlueprintCallable)
+	void StopCrouching();
+
+	// Character blocking
+	UFUNCTION(BlueprintCallable)
+	void StartBlocking();
+	UFUNCTION(BlueprintCallable)
+	void StopBlocking();
+
+	UFUNCTION(BlueprintCallable)
+	void Landed();
 
 	// Player 2
 	UFUNCTION(BlueprintCallable)
@@ -82,6 +102,10 @@ public:
 	UAnimMontage* r_kick;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
 	UAnimMontage* l_punchReact;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
+	UAnimMontage* blocking;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
+	UAnimMontage* uppercut;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player References")
 	ACPP_Character* opponent;
@@ -110,15 +134,19 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Check")
 	bool IsDie;
 
+	// Player Flip check and change
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Model")
+	bool isFlipped;
+
+	// Player crouch check.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	bool isCrouching;
+
 	// The amount of health the character currently has.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 	float MaxHealth;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 	float CurrentHealth = 100.0f;
-
-	// Player Flip check and change
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Model")
-	bool isFlipped;
 
 	// The maximum amount of distance that the characters can be apart.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
@@ -127,6 +155,18 @@ public:
 	// The amount of thim the character will be stunned.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float stunTime;
+
+	// The amount of thim the character will be stunned.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float pushbackDistance;
+
+	// The amount of distance to launch the player.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float launchDistance;
+
+	// The scaled value of gravity.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float gravityScale;
 
 public:
 	FName hitBone;
@@ -154,7 +194,5 @@ public:
 	void CheckKick_Implementation(bool is_leftLeg) override;
 
 	void CheckAttack_Implementation() override;
-
-	// end of fight interface
 
 };
