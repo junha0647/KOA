@@ -142,6 +142,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	bool isCrouching;
 
+	// Enemy uppercut check.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	bool isuppercut;
+
 	// The amount of health the character currently has.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 	float MaxHealth;
@@ -173,6 +177,9 @@ public:
 	
 	// The timer handle for all stuns
 	FTimerHandle stunTimerHandle;
+
+	// The timer handle for all 
+	FTimerHandle uppercutTimerHandle;
 
 protected:
 	// Called when the game starts or when spawned
