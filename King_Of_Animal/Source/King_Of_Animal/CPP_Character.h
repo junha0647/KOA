@@ -280,6 +280,9 @@ public:
 	// The amount of super meter thr player has.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Super Meter")
 	float superMeterAmount;
+	// The amount of super meter thr player has.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Super Meter")
+	float currentsuperMeterAmount;
 
 public:
 	FName hitBone;

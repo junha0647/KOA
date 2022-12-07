@@ -38,6 +38,7 @@ ACPP_Character::ACPP_Character()
 	launchDistance = 0.0f;
 	gravityScale = GetCharacterMovement()->GravityScale;
 	superMeterAmount = 0.0f;
+	currentsuperMeterAmount = 100.0f;
 
 	wasLightAttackUsed = false;
 	wasMediumAttackUsed = false;
@@ -423,17 +424,6 @@ void ACPP_Character::TakeDamage(float damageAmount, float hitstunTime, float blo
 			stunTime = hitstunTime;
 
 			
-			if (opponent)
-			{
-				opponent->PerformPushback(pushbackAmount, 0.0f, false);
-
-				if (!opponent->wasLightExAttackUsed)
-				{
-					// 이거 잘모르겠음
-					opponent->superMeterAmount += damageAmount * 0.30f;
-				}
-			}
-
 			if (launchAmount > 0) 
 			{
 				PerformPushback(pushbackAmount, launchAmount, false);
@@ -447,6 +437,11 @@ void ACPP_Character::TakeDamage(float damageAmount, float hitstunTime, float blo
 				}
 				PunchReast();
 				PerformPushback(pushbackAmount, launchAmount, false);
+				if (!opponent->wasLightExAttackUsed)
+				{
+					// 이거 잘모르겠음
+					opponent->superMeterAmount += damageAmount * 0.30f;
+				}
 			}
 
 		}
@@ -455,6 +450,7 @@ void ACPP_Character::TakeDamage(float damageAmount, float hitstunTime, float blo
 			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Blocking"));
 			float reducedDamage = damageAmount * 0.3f;
 			MaxHealth -= reducedDamage;
+			superMeterAmount += damageAmount * 0.40f;
 
 			stunTime = blockstunTime;
 
@@ -467,6 +463,11 @@ void ACPP_Character::TakeDamage(float damageAmount, float hitstunTime, float blo
 				characterState = ECharacterState::VE_Default;
 			}
 
+			if (!opponent->wasLightExAttackUsed)
+			{
+				// 이거 잘모르겠음
+				opponent->superMeterAmount += damageAmount * 0.15f;
+			}
 			/*
 			if (opponent)
 			{
@@ -633,13 +634,13 @@ void ACPP_Character::CheckInputBufferForCommand()
 {
 	int correctSequenceCounter = 0;
 
-	for (int commanInput = 0; commanInput < tempCommand.inputs.Num(); ++commanInput)
+	for (int commandInput = 0; commandInput < tempCommand.inputs.Num(); ++commandInput)
 	{
 		for (int input = 0; input < inputBuffer.Num(); ++input)
 		{
 			if (input + correctSequenceCounter < inputBuffer.Num())
 			{
-				if (inputBuffer[input + correctSequenceCounter].inputName.Compare(tempCommand.inputs[commandsInput]) == 0)
+				if (inputBuffer[input + correctSequenceCounter].inputName.Compare(tempCommand.inputs[commandInput]) == 0)
 				{
 					UE_LOG(LogTemp, Warning, TEXT("The player added another input to the command sequence."));
 					++correctSequenceCounter;
