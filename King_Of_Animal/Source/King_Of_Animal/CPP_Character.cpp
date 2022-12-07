@@ -53,6 +53,23 @@ ACPP_Character::ACPP_Character()
 	IsDie = false;
 	isCrouching = false;
 	isuppercut = false;
+
+	/*
+		[ 22.12.08 ]
+		작성자 : 20181275 조준하
+	*/
+
+	removeInputFromBufferTime = 1.0f;
+	
+	tempCommand.name = "Temp Command";
+	tempCommand.inputs.Add("A");
+	tempCommand.inputs.Add("B");
+	tempCommand.inputs.Add("C");
+	hasUsedTempCommand = false;
+
+	/*
+		작성 종료
+	*/
 }
 
 // Called when the game starts or when spawned
@@ -134,6 +151,18 @@ void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 			PlayerInputComponent->BindAction("Uppercut_P1", IE_Pressed, this, &ACPP_Character::Uppercut);
 
 			PlayerInputComponent->BindAction("ExceptionalAttack_P1", IE_Pressed, this, &ACPP_Character::StartExceptionalAttack);
+		
+			/*
+				[ 22.12.08 ]
+				작성자 : 20181275 조준하
+			*/
+
+			// This will work for Player 1 assuming their inputs are filltered to only controls that they can use.
+			// PlayerInputComponent->BindAction("AddToInputBuffer", IE_Pressed, this, &ACPP_Character::AddInputToInputBuffer);
+		
+			/*
+				작성 종료
+			*/
 		}
 		else
 		{
@@ -151,6 +180,18 @@ void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 			PlayerInputComponent->BindAction("Uppercut_P2", IE_Pressed, this, &ACPP_Character::Uppercut);
 
 			PlayerInputComponent->BindAction("ExceptionalAttack_P2", IE_Pressed, this, &ACPP_Character::StartExceptionalAttack);
+		
+			/*
+				[ 22.12.08 ]
+				작성자 : 20181275 조준하
+			*/
+
+			// This will work for Player 2 assuming their inputs are filltered to only controls that they can use.
+			// PlayerInputComponent->BindAction("AddToInputBuffer", IE_Pressed, this, &ACPP_Character::AddInputToInputBuffer);
+
+			/*
+				작성 종료
+			*/
 		}
 	}
 
@@ -577,3 +618,66 @@ void ACPP_Character::CheckAttack_Implementation()
 	PK_Check = true;
 }
 
+/*
+	[ 22.12.08 ]
+	작성자 : 20181275 조준하
+*/
+
+void ACPP_Character::AddInputToInputBuffer(FInputInfo _inputInfo)
+{
+	inputBuffer.Add(_inputInfo);
+	// GetWorld()->GetTimerManager().SetTimer(inputBufferTimerHandle, this, &ACPP_Character::RemoveInputFromInputBuffer, removeInputFromBufferTime, false);
+}
+
+void ACPP_Character::CheckInputBufferForCommand()
+{
+	int correctSequenceCounter = 0;
+
+	for (int commanInput = 0; commanInput < tempCommand.inputs.Num(); ++commanInput)
+	{
+		for (int input = 0; input < inputBuffer.Num(); ++input)
+		{
+			if (input + correctSequenceCounter < inputBuffer.Num())
+			{
+				if (inputBuffer[input + correctSequenceCounter].inputName.Compare(tempCommand.inputs[commandsInput]) == 0)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("The player added another input to the command sequence."));
+					++correctSequenceCounter;
+
+					if (correctSequenceCounter == tempCommand.inputs.Num())
+					{
+						StartCommand(tempCommand.name);
+					}
+					break;
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("The player broke the command sequence."));
+					correctSequenceCounter = 0;
+				}
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("The player is not yet finished with the command sequence."));
+			}
+		}
+	}
+}
+
+void ACPP_Character::StartCommand(FString _commandName)
+{
+	if (_commandName.Compare(tempCommand.name) == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("The character is using the command: %s,"), *_commandName);
+		hasUsedTempCommand = true;
+	}
+}
+
+void ACPP_Character::RemoveInputFromInputBuffer()
+{
+
+}
+
+/*
+	작성 종료
+*/

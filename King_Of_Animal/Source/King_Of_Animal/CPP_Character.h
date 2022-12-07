@@ -23,6 +23,32 @@ enum class ECharacterState : uint8
 	VE_Launched  UMETA(DisplayName = "LAUNCHED")
 };
 
+USTRUCT(BlueprintType)
+struct FCommand
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	FString name;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	TArray<FString> inputs;
+};
+
+USTRUCT(BlueprintType)
+struct FInputInfo
+{
+	GENERATED_BODY();
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	FString inputName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	float timeStamp;
+};
+
 UCLASS()
 class KING_OF_ANIMAL_API ACPP_Character : public ACharacter, public IFightInterface
 {
@@ -95,6 +121,51 @@ protected:
 
 
 	FName GetClosestBone(FVector hitBonelocation, float maxDistance);
+
+	/*
+		[ 22.12.08 ]
+		작성자 : 20181275 조준하
+	*/
+
+	// Adds inputs to the input buffer.
+	UFUNCTION(BlueprintCallable)
+	void AddInputToInputBuffer(FInputInfo _inputInfo);
+
+	// Check if the input buffer contains any sequences from the character's list of commands.
+	UFUNCTION(BlueprintCallable)
+	void CheckInputBufferForCommand();
+
+	// Make the character begin using a command based off of the command's name.
+	UFUNCTION(BlueprintCallable)
+	void StartCommand(FString _commandName);
+
+	// Removes inputs from the input buffer.
+	UFUNCTION(BlueprintCallable)
+	void RemoveInputFromInputBuffer();
+
+	// The array of inputs the player controlling this character has performed.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	TArray<FInputInfo> inputBuffer;
+
+	// Commands to be used when a correct series of inputs has been pressed.
+	FCommand tempCommand;
+
+	// The timer handle to remove inputs from the input buffer.
+	FTimerHandle inputBufferTimerHandle;
+
+	// The amount of time before inputs are removed from the input buffer.
+	float removeInputFromBufferTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	bool isDeviceForMultiplePlayers;
+
+	// Command Booleans.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Commands")
+	bool hasUsedTempCommand;
+	 
+	/*
+		작성 종료
+	*/
 
 public:
 	// player AnimMontage
@@ -208,7 +279,7 @@ public:
 
 	// The amount of super meter thr player has.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Super Meter")
-		float superMeterAmount;
+	float superMeterAmount;
 
 public:
 	FName hitBone;
