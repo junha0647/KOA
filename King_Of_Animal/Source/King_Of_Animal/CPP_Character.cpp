@@ -37,6 +37,15 @@ ACPP_Character::ACPP_Character()
 	pushbackDistance = 200.0f;
 	launchDistance = 0.0f;
 	gravityScale = GetCharacterMovement()->GravityScale;
+	superMeterAmount = 0.0f;
+
+	wasLightAttackUsed = false;
+	wasMediumAttackUsed = false;
+	wasHeavyAttackUsed = false;
+	wasSuperUsed = false;
+	wasLightExAttackUsed = false;
+	wasMediumExAttackUsed = false;
+	wasHeavyExAttackUsed = false;
 
 	PK_Check = true;
 	canMove = true;
@@ -123,6 +132,8 @@ void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 			PlayerInputComponent->BindAction("L_Kick_P1", IE_Pressed, this, &ACPP_Character::L_Kick);
 			PlayerInputComponent->BindAction("R_Kick_P1", IE_Pressed, this, &ACPP_Character::R_Kick);
 			PlayerInputComponent->BindAction("Uppercut_P1", IE_Pressed, this, &ACPP_Character::Uppercut);
+
+			PlayerInputComponent->BindAction("ExceptionalAttack_P1", IE_Pressed, this, &ACPP_Character::StartExceptionalAttack);
 		}
 		else
 		{
@@ -138,6 +149,8 @@ void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 			PlayerInputComponent->BindAction("L_Kick_P2", IE_Pressed, this, &ACPP_Character::L_Kick);
 			PlayerInputComponent->BindAction("R_Kick_P2", IE_Pressed, this, &ACPP_Character::R_Kick);
 			PlayerInputComponent->BindAction("Uppercut_P2", IE_Pressed, this, &ACPP_Character::Uppercut);
+
+			PlayerInputComponent->BindAction("ExceptionalAttack_P2", IE_Pressed, this, &ACPP_Character::StartExceptionalAttack);
 		}
 	}
 
@@ -245,6 +258,30 @@ void ACPP_Character::Uppercut()
 	}
 }
 
+void ACPP_Character::StartExceptionalAttack()
+{
+	if (wasLightAttackUsed)
+	{
+		wasLightExAttackUsed = true;
+		superMeterAmount -= 0.20f;
+	}
+	else if (wasMediumAttackUsed)
+	{
+		wasMediumExAttackUsed = true;
+		superMeterAmount -= 0.35f;
+	}
+	else if (wasHeavyAttackUsed)
+	{
+		wasHeavyExAttackUsed = true;
+		superMeterAmount -= 0.50f;
+	}
+
+	if (superMeterAmount < 0.00f)
+	{
+		superMeterAmount = 0.00f;
+	}
+}
+
 void ACPP_Character::BeginStun()
 {
 	canMove = false;
@@ -340,14 +377,21 @@ void ACPP_Character::TakeDamage(float damageAmount, float hitstunTime, float blo
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Damege"));
 			MaxHealth -= damageAmount;
+			superMeterAmount += damageAmount * 0.85f;   
 
 			stunTime = hitstunTime;
 
-			/*
+			
 			if (opponent)
 			{
 				opponent->PerformPushback(pushbackAmount, 0.0f, false);
-			}*/
+
+				if (!opponent->wasLightExAttackUsed)
+				{
+					// 이거 잘모르겠음
+					opponent->superMeterAmount += damageAmount * 0.30f;
+				}
+			}
 
 			if (launchAmount > 0) 
 			{
@@ -434,6 +478,16 @@ void ACPP_Character::Jump_P2()
 void ACPP_Character::StopJump_P2()
 {
 	StopJumping();
+}
+
+void ACPP_Character::Uppercut_P2()
+{
+	Uppercut();
+}
+
+void ACPP_Character::StartExceptionalAttack_P2()
+{
+	StartExceptionalAttack();
 }
 
 //fight interface funcions

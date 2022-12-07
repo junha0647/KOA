@@ -44,6 +44,8 @@ protected:
 	void L_Kick();
 	void R_Kick();
 	void Uppercut();
+	void StartExceptionalAttack();
+
 	// player Hit
 	void PunchReast();
 	// Damage the play
@@ -85,6 +87,10 @@ protected:
 	void Jump_P2();
 	UFUNCTION(BlueprintCallable)
 	void StopJump_P2();
+	UFUNCTION(BlueprintCallable)
+	void Uppercut_P2();
+	UFUNCTION(BlueprintCallable)
+	void StartExceptionalAttack_P2();
 
 
 
@@ -146,6 +152,34 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	bool isuppercut;
 
+	// Has the player used the light attack?
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attacks")
+	bool wasLightAttackUsed;
+
+	// Has the player used the medium attack?
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attacks")
+	bool wasMediumAttackUsed;
+
+	// Has the player used the heavy attack?
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attacks")
+	bool wasHeavyAttackUsed;
+
+	// Has the player used the super attack?
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attacks")
+	bool wasSuperUsed;
+
+	// Has the player used the medium exceptional attack?
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attacks")
+	bool wasLightExAttackUsed;
+
+	// Has the player used the heavy exceptional attack?
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attacks")
+	bool wasMediumExAttackUsed;
+
+	// Has the player used the super exceptional attack?
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attacks")
+	bool wasHeavyExAttackUsed;
+
 	// The amount of health the character currently has.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 	float MaxHealth;
@@ -171,6 +205,10 @@ public:
 	// The scaled value of gravity.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float gravityScale;
+
+	// The amount of super meter thr player has.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Super Meter")
+		float superMeterAmount;
 
 public:
 	FName hitBone;
