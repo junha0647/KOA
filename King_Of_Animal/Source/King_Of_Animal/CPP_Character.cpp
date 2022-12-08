@@ -68,6 +68,23 @@ ACPP_Character::ACPP_Character()
 	tempCommand.inputs.Add("C");
 	hasUsedTempCommand = false;
 
+	// Create and assign the character's commands.
+	characterCommands.SetNum(2);
+
+	// Command #1 assignments.
+	characterCommands[0].name = "Command #1";
+	characterCommands[0].inputs.Add("A");
+	characterCommands[0].inputs.Add("B");
+	characterCommands[0].inputs.Add("C");
+	characterCommands[0].hasUsedCommand = false;
+
+	// Command #2 assignments.
+	characterCommands[1].name = "Command #2";
+	characterCommands[1].inputs.Add("A");
+	characterCommands[1].inputs.Add("B");
+	characterCommands[1].inputs.Add("D");
+	characterCommands[1].hasUsedCommand = false;
+
 	/*
 		작성 종료
 	*/
@@ -627,6 +644,7 @@ void ACPP_Character::CheckAttack_Implementation()
 void ACPP_Character::AddInputToInputBuffer(FInputInfo _inputInfo)
 {
 	inputBuffer.Add(_inputInfo);
+	CheckInputBufferForCommand();
 	// GetWorld()->GetTimerManager().SetTimer(inputBufferTimerHandle, this, &ACPP_Character::RemoveInputFromInputBuffer, removeInputFromBufferTime, false);
 }
 
@@ -634,32 +652,36 @@ void ACPP_Character::CheckInputBufferForCommand()
 {
 	int correctSequenceCounter = 0;
 
-	for (int commandInput = 0; commandInput < tempCommand.inputs.Num(); ++commandInput)
+	for (auto currentCommand : characterCommands)
 	{
-		for (int input = 0; input < inputBuffer.Num(); ++input)
+		for (int commandInput = 0; commandInput < currentCommand.inputs.Num(); ++commandInput)
 		{
-			if (input + correctSequenceCounter < inputBuffer.Num())
+			for (int input = 0; input < inputBuffer.Num(); ++input)
 			{
-				if (inputBuffer[input + correctSequenceCounter].inputName.Compare(tempCommand.inputs[commandInput]) == 0)
+				if (input + correctSequenceCounter < inputBuffer.Num())
 				{
-					UE_LOG(LogTemp, Warning, TEXT("The player added another input to the command sequence."));
-					++correctSequenceCounter;
-
-					if (correctSequenceCounter == tempCommand.inputs.Num())
+					if (inputBuffer[input + correctSequenceCounter].inputName.Compare(currentCommand.inputs[commandInput]) == 0)
 					{
-						StartCommand(tempCommand.name);
+						UE_LOG(LogTemp, Warning, TEXT("The player added another input to the command sequence."));
+						++correctSequenceCounter;
+
+						if (correctSequenceCounter == currentCommand.inputs.Num())
+						{
+							StartCommand(currentCommand.name);
+						}
+						break;
 					}
-					break;
+					else
+					{
+						UE_LOG(LogTemp, Warning, TEXT("The player broke the command sequence."));
+						correctSequenceCounter = 0;
+					}
 				}
 				else
 				{
-					UE_LOG(LogTemp, Warning, TEXT("The player broke the command sequence."));
+					UE_LOG(LogTemp, Warning, TEXT("The player is not yet finished with the command sequence."));
 					correctSequenceCounter = 0;
 				}
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("The player is not yet finished with the command sequence."));
 			}
 		}
 	}
@@ -667,10 +689,13 @@ void ACPP_Character::CheckInputBufferForCommand()
 
 void ACPP_Character::StartCommand(FString _commandName)
 {
-	if (_commandName.Compare(tempCommand.name) == 0)
+	for (int currentCommand = 0; currentCommand < characterCommands.Num(); ++currentCommand)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("The character is using the command: %s,"), *_commandName);
-		hasUsedTempCommand = true;
+		if (_commandName.Compare(characterCommands[currentCommand].name) == 0)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("The character is using the command: %s,"), *_commandName);
+			characterCommands[currentCommand].hasUsedCommand = true;
+		}
 	}
 }
 

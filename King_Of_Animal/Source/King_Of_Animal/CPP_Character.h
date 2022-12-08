@@ -23,6 +23,11 @@ enum class ECharacterState : uint8
 	VE_Launched  UMETA(DisplayName = "LAUNCHED")
 };
 
+/*
+	[ 22.12.08 ]
+	작성자 : 20181275 조준하
+*/
+
 USTRUCT(BlueprintType)
 struct FCommand
 {
@@ -34,6 +39,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	TArray<FString> inputs;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	bool hasUsedCommand;
 };
 
 USTRUCT(BlueprintType)
@@ -48,6 +56,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	float timeStamp;
 };
+
+/*
+	작성 종료
+*/
 
 UCLASS()
 class KING_OF_ANIMAL_API ACPP_Character : public ACharacter, public IFightInterface
@@ -146,6 +158,10 @@ protected:
 	// The array of inputs the player controlling this character has performed.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	TArray<FInputInfo> inputBuffer;
+
+	// Commands to be used when a correct series of inputs has been pressed.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	TArray<FCommand> characterCommands;
 
 	// Commands to be used when a correct series of inputs has been pressed.
 	FCommand tempCommand;
