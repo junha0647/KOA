@@ -83,6 +83,7 @@ protected:
 	void R_Kick();
 	void Uppercut();
 	void StartExceptionalAttack();
+	void Skill_4();
 
 	// player Hit
 	void PunchReast();
@@ -199,6 +200,8 @@ public:
 	UAnimMontage* blocking;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
 	UAnimMontage* uppercut;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
+	UAnimMontage* skill_4;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player References")
 	ACPP_Character* opponent;
@@ -267,6 +270,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attacks")
 	bool wasHeavyExAttackUsed;
 
+	// Has the player used the super exceptional attack?
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attacks")
+	bool canUseExAttack;
+
 	// The amount of health the character currently has.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 	float MaxHealth;
@@ -280,6 +287,18 @@ public:
 	// The amount of thim the character will be stunned.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float stunTime;
+
+	// Player Attack Damage
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Attacks")
+	float DamageAmount;
+
+	// Player basics Attack Damage
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attacks")
+	float basicsDamageAmount;
+
+	// Player skill_1 Attack Damage
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attacks")
+	float SkillDamageAmount_1;
 
 	// The amount of thim the character will be stunned.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")

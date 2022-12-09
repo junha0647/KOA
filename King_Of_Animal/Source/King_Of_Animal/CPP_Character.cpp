@@ -39,6 +39,9 @@ ACPP_Character::ACPP_Character()
 	gravityScale = GetCharacterMovement()->GravityScale;
 	superMeterAmount = 0.0f;
 	currentsuperMeterAmount = 100.0f;
+	DamageAmount = 0.0f;
+	basicsDamageAmount = 5.0f;
+	SkillDamageAmount_1 = 10.0f;
 
 	wasLightAttackUsed = false;
 	wasMediumAttackUsed = false;
@@ -47,6 +50,7 @@ ACPP_Character::ACPP_Character()
 	wasLightExAttackUsed = false;
 	wasMediumExAttackUsed = false;
 	wasHeavyExAttackUsed = false;
+	canUseExAttack = true;
 
 	PK_Check = true;
 	canMove = true;
@@ -73,9 +77,9 @@ ACPP_Character::ACPP_Character()
 
 	// Command #1 assignments.
 	characterCommands[0].name = "Command #1";
-	characterCommands[0].inputs.Add("A");
-	characterCommands[0].inputs.Add("B");
-	characterCommands[0].inputs.Add("C");
+	characterCommands[0].inputs.Add("D");
+	characterCommands[0].inputs.Add("Y");
+	characterCommands[0].inputs.Add("U");
 	characterCommands[0].hasUsedCommand = false;
 
 	// Command #2 assignments.
@@ -100,7 +104,7 @@ void ACPP_Character::BeginPlay()
 void ACPP_Character::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (characterState != ECharacterState::VE_Jumping) {
+	if (characterState != ECharacterState::VE_Jumping && characterState != ECharacterState::VE_Dead) {
 		if (opponent)
 		{
 			if (auto characterMovement = GetCharacterMovement())
@@ -115,7 +119,7 @@ void ACPP_Character::Tick(float DeltaTime)
 							{
 								transform = mesh->GetRelativeTransform();
 								scale = transform.GetScale3D();
-								scale.Y = -0.3f;
+								scale.Y = -1.0f;
 								transform.SetScale3D(scale);
 								mesh->SetRelativeTransform(transform);
 							}
@@ -130,7 +134,7 @@ void ACPP_Character::Tick(float DeltaTime)
 							{
 								transform = mesh->GetRelativeTransform();
 								scale = transform.GetScale3D();
-								scale.Y = 0.3f;
+								scale.Y = 1.0f;
 								transform.SetScale3D(scale);
 								mesh->SetRelativeTransform(transform);
 							}
@@ -167,6 +171,7 @@ void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 			PlayerInputComponent->BindAction("L_Kick_P1", IE_Pressed, this, &ACPP_Character::L_Kick);
 			PlayerInputComponent->BindAction("R_Kick_P1", IE_Pressed, this, &ACPP_Character::R_Kick);
 			PlayerInputComponent->BindAction("Uppercut_P1", IE_Pressed, this, &ACPP_Character::Uppercut);
+			PlayerInputComponent->BindAction("Skill_4", IE_Pressed, this, &ACPP_Character::Skill_4);
 
 			PlayerInputComponent->BindAction("ExceptionalAttack_P1", IE_Pressed, this, &ACPP_Character::StartExceptionalAttack);
 		
@@ -276,15 +281,21 @@ void ACPP_Character::L_Punch()
 	if (l_punch && canMove && PK_Check && characterState != ECharacterState::VE_Dead)
 	{
 		PlayAnimMontage(l_punch, 1, NAME_None);
+		DamageAmount = basicsDamageAmount;
 		PK_Check = false;
 	}
 }
 
 void ACPP_Character::R_Punch()
 {
-	if (r_punch && canMove && PK_Check && characterState != ECharacterState::VE_Dead)
+	if (characterCommands[0].hasUsedCommand)
+	{
+		PlayAnimMontage(uppercut, 0.7f, NAME_None);
+	}
+	else if (r_punch && canMove && PK_Check && characterState != ECharacterState::VE_Dead)
 	{
 		PlayAnimMontage(r_punch, 1, NAME_None);
+		DamageAmount = basicsDamageAmount;
 		PK_Check = false;
 	}
 }
@@ -294,6 +305,7 @@ void ACPP_Character::L_Kick()
 	if (l_kick && canMove && PK_Check && characterState != ECharacterState::VE_Dead)
 	{
 		PlayAnimMontage(l_kick, 1, NAME_None);
+		DamageAmount = basicsDamageAmount;
 		PK_Check = false;
 	}
 }
@@ -303,6 +315,7 @@ void ACPP_Character::R_Kick()
 	if (r_kick && canMove && PK_Check && characterState != ECharacterState::VE_Dead)
 	{
 		PlayAnimMontage(r_kick, 1, NAME_None);
+		DamageAmount = basicsDamageAmount;
 		PK_Check = false;
 	}
 }
@@ -311,28 +324,43 @@ void ACPP_Character::Uppercut()
 {
 	if (l_punch && canMove && PK_Check && characterState != ECharacterState::VE_Dead)
 	{
-		PlayAnimMontage(uppercut, 1, NAME_None);
+		PlayAnimMontage(uppercut, 0.7f, NAME_None);
+		wasLightAttackUsed = true;
 		PK_Check = false;
+		DamageAmount = SkillDamageAmount_1;
 		launchDistance = 500.0f;
+	}
+}
+
+void ACPP_Character::Skill_4()
+{
+	if (superMeterAmount >= 100.0f)
+	{
+		if (skill_4 && canMove && PK_Check && characterState != ECharacterState::VE_Dead)
+		{
+			PlayAnimMontage(skill_4, 1, NAME_None);
+		}
 	}
 }
 
 void ACPP_Character::StartExceptionalAttack()
 {
-	if (wasLightAttackUsed)
+	if (wasLightAttackUsed && superMeterAmount >= 20.0f && canUseExAttack)
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("LightAttack"));
 		wasLightExAttackUsed = true;
-		superMeterAmount -= 0.20f;
+		DamageAmount = 20.0f;
+		superMeterAmount -= 20.0f;
 	}
-	else if (wasMediumAttackUsed)
+	else if (wasMediumAttackUsed && superMeterAmount >= 35.0f && canUseExAttack)
 	{
 		wasMediumExAttackUsed = true;
-		superMeterAmount -= 0.35f;
+		superMeterAmount -= 35.0f;
 	}
-	else if (wasHeavyAttackUsed)
+	else if (wasHeavyAttackUsed && superMeterAmount >= 50.0f && canUseExAttack)
 	{
 		wasHeavyExAttackUsed = true;
-		superMeterAmount -= 0.50f;
+		superMeterAmount -= 50.0f;
 	}
 
 	if (superMeterAmount < 0.00f)
@@ -379,7 +407,7 @@ void ACPP_Character::PerformPushback(float pushbackAmount, float launchAmount, b
 			isuppercut = true;
 			canMove = false;
 			GetCharacterMovement()->GravityScale *= 0.5f;
-			GetWorld()->GetTimerManager().SetTimer(uppercutTimerHandle, this, &ACPP_Character::Landed, 0.3f, false);
+			GetWorld()->GetTimerManager().SetTimer(uppercutTimerHandle, this, &ACPP_Character::Landed, 0.1f, false);
 		}
 		
 		if (isFlipped)
@@ -570,7 +598,7 @@ void ACPP_Character::CheckPunch_Implementation(bool is_leftHand)
 
 	if (hitBone != "" && canMove && !opponent->isuppercut)
 	{
-		opponent->TakeDamage(10.0f, 0.3f, 0.3f, pushbackDistance, launchDistance);
+		opponent->TakeDamage(DamageAmount, 0.3f, 0.3f, pushbackDistance, launchDistance);
 	}
 }
 
@@ -594,7 +622,7 @@ void ACPP_Character::CheckKick_Implementation(bool is_leftLeg)
 
 	if (hitBone != "" && canMove && !opponent->isuppercut)
 	{
-		opponent->TakeDamage(10.0f, 0.3f, 0.3f, pushbackDistance, launchDistance);
+		opponent->TakeDamage(DamageAmount, 0.3f, 0.3f, pushbackDistance, launchDistance);
 	}
 }
 
