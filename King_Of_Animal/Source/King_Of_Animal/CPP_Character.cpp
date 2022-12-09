@@ -468,7 +468,7 @@ void ACPP_Character::TakeDamage(float damageAmount, float hitstunTime, float blo
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Damege"));
 			MaxHealth -= damageAmount;
-			superMeterAmount += damageAmount * 0.85f;   
+			superMeterAmount += damageAmount * 8.5f;   
 
 			stunTime = hitstunTime;
 
@@ -488,8 +488,7 @@ void ACPP_Character::TakeDamage(float damageAmount, float hitstunTime, float blo
 				PerformPushback(pushbackAmount, launchAmount, false);
 				if (!opponent->wasLightExAttackUsed)
 				{
-					// 이거 잘모르겠음
-					opponent->superMeterAmount += damageAmount * 0.30f;
+					opponent->superMeterAmount += damageAmount * 3.0f;
 				}
 			}
 
@@ -497,9 +496,9 @@ void ACPP_Character::TakeDamage(float damageAmount, float hitstunTime, float blo
 		else
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Blocking"));
-			float reducedDamage = damageAmount * 0.3f;
+			float reducedDamage = damageAmount * 3.0f;
 			MaxHealth -= reducedDamage;
-			superMeterAmount += damageAmount * 0.40f;
+			superMeterAmount += damageAmount * 4.0f;
 
 			stunTime = blockstunTime;
 
@@ -613,11 +612,11 @@ void ACPP_Character::CheckKick_Implementation(bool is_leftLeg)
 	FVector LegLocation;
 	if (is_leftLeg)
 	{
-		LegLocation = GetMesh()->GetBoneLocation("LeftLeg", EBoneSpaces::WorldSpace);
+		LegLocation = GetMesh()->GetBoneLocation("LeftToe_End", EBoneSpaces::WorldSpace);
 	}
 	else
 	{
-		LegLocation = GetMesh()->GetBoneLocation("RightLeg", EBoneSpaces::WorldSpace);
+		LegLocation = GetMesh()->GetBoneLocation("RightToe_End", EBoneSpaces::WorldSpace);
 	}
 
 
@@ -637,6 +636,18 @@ FName ACPP_Character::GetClosestBone(FVector hitBonelocation, float maxDistance)
 
 	FName closestBone;
 	float minDist = 10000;
+
+	for (int i = 0; i < boneNames.Num(); ++i)
+	{
+		FVector boneLocation = GetMesh()->GetBoneLocation(boneNames[i], EBoneSpaces::WorldSpace);
+		float tempDist = FVector::Dist(hitBonelocation, boneLocation);
+
+		if (minDist > tempDist)
+		{
+			minDist = tempDist;
+			closestBone = boneNames[i];
+		}
+	}
 
 	for (int i = 0; i < boneNames.Num(); ++i)
 	{
