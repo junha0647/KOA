@@ -12,6 +12,9 @@ class AKing_Of_AnimalGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 
+protected:
+	virtual void BeginPlay() override;
+
 public:
 	AKing_Of_AnimalGameMode();
 
@@ -20,6 +23,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player References")
 		ACPP_Character* player2;
 
+	void CountDown();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Count")
+		void CountFinished();
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
+		int32 countTime;
+
+	FTimerHandle TimerHand;
 };
 
 

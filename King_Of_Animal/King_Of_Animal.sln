@@ -13,7 +13,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UE4", "Intermediate\Project
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Visualizers", "Visualizers", "{1CCEC849-CC72-4C59-8C36-2F7C38706D4C}"
 	ProjectSection(SolutionItems) = preProject
-		..\..\..\..\Program Files\Epic Games\UE_4.27\Engine\Extras\VisualStudioDebugging\UE4.natvis = ..\..\..\..\Program Files\Epic Games\UE_4.27\Engine\Extras\VisualStudioDebugging\UE4.natvis
+		..\..\..\..\Program Files (x86)\UE_4.27\Engine\Extras\VisualStudioDebugging\UE4.natvis = ..\..\..\..\Program Files (x86)\UE_4.27\Engine\Extras\VisualStudioDebugging\UE4.natvis
 	EndProjectSection
 EndProject
 Global
@@ -67,7 +67,10 @@ Global
 		{B0D28A18-7DBA-4AA3-8008-DFBCA2FA0A4B} = {94A6C6F3-99B3-346E-9557-ABF9D4064DBD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {9D1668C8-B899-420F-9A83-976D48619C2E}
+		SolutionGuid = {97443EC4-0669-4909-ADEE-199E54F27F1F}
+	EndGlobalSection
+	GlobalSection(44630d46-96b5-488c-8df926e21db8c1a3) = preSolution
+		ueSolution = true
 	EndGlobalSection
 	GlobalSection(44630d46-96b5-488c-8df926e21db8c1a3) = preSolution
 		ueSolution = true
