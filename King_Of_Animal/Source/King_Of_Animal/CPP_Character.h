@@ -180,6 +180,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Commands")
 	bool hasUsedTempCommand;
 	 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Commands")
+	bool command_Check;
+
 	/*
 		작성 종료
 	*/

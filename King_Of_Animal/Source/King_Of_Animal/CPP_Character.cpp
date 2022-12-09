@@ -89,6 +89,8 @@ ACPP_Character::ACPP_Character()
 	characterCommands[1].inputs.Add("D");
 	characterCommands[1].hasUsedCommand = false;
 
+	command_Check = true;
+
 	/*
 		작성 종료
 	*/
@@ -288,9 +290,9 @@ void ACPP_Character::L_Punch()
 
 void ACPP_Character::R_Punch()
 {
-	if (characterCommands[0].hasUsedCommand)
+	if (characterCommands[0].hasUsedCommand && canMove && command_Check && characterState != ECharacterState::VE_Dead)
 	{
-		PlayAnimMontage(uppercut, 0.7f, NAME_None);
+		Uppercut();
 	}
 	else if (r_punch && canMove && PK_Check && characterState != ECharacterState::VE_Dead)
 	{
@@ -322,13 +324,15 @@ void ACPP_Character::R_Kick()
 
 void ACPP_Character::Uppercut()
 {
-	if (l_punch && canMove && PK_Check && characterState != ECharacterState::VE_Dead)
+	if (canMove && characterState != ECharacterState::VE_Dead)
 	{
 		PlayAnimMontage(uppercut, 0.7f, NAME_None);
 		wasLightAttackUsed = true;
 		PK_Check = false;
+		command_Check = false;
 		DamageAmount = SkillDamageAmount_1;
 		launchDistance = 500.0f;
+		characterCommands[0].hasUsedCommand = false;
 	}
 }
 
