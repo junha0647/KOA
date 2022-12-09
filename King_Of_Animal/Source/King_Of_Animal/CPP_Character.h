@@ -164,21 +164,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	TArray<FCommand> characterCommands;
 
-	// Commands to be used when a correct series of inputs has been pressed.
-	FCommand tempCommand;
-
 	// The timer handle to remove inputs from the input buffer.
 	FTimerHandle inputBufferTimerHandle;
 
-	// The amount of time before inputs are removed from the input buffer.
-	float removeInputFromBufferTime;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	bool isDeviceForMultiplePlayers;
-
-	// Command Booleans.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Commands")
-	bool hasUsedTempCommand;
 	 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Commands")
 	bool command_Check;

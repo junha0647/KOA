@@ -64,30 +64,32 @@ ACPP_Character::ACPP_Character()
 		작성자 : 20181275 조준하
 	*/
 
-	removeInputFromBufferTime = 1.0f;
-	
-	tempCommand.name = "Temp Command";
-	tempCommand.inputs.Add("A");
-	tempCommand.inputs.Add("B");
-	tempCommand.inputs.Add("C");
-	hasUsedTempCommand = false;
-
 	// Create and assign the character's commands.
-	characterCommands.SetNum(2);
+	characterCommands.SetNum(3);
 
 	// Command #1 assignments.
 	characterCommands[0].name = "Command #1";
+	characterCommands[0].inputs.Add("A");
 	characterCommands[0].inputs.Add("D");
 	characterCommands[0].inputs.Add("Y");
-	characterCommands[0].inputs.Add("U");
 	characterCommands[0].hasUsedCommand = false;
+	// 어퍼컷
 
 	// Command #2 assignments.
 	characterCommands[1].name = "Command #2";
-	characterCommands[1].inputs.Add("A");
-	characterCommands[1].inputs.Add("B");
 	characterCommands[1].inputs.Add("D");
+	characterCommands[1].inputs.Add("D");
+	characterCommands[1].inputs.Add("J");
 	characterCommands[1].hasUsedCommand = false;
+	// 돌려차기
+
+	// Command #3 assignments.
+	characterCommands[2].name = "Ult";
+	characterCommands[2].inputs.Add("D");
+	characterCommands[2].inputs.Add("H");
+	characterCommands[2].inputs.Add("J");
+	characterCommands[2].hasUsedCommand = false;
+	// 필살기
 
 	command_Check = true;
 
@@ -176,18 +178,6 @@ void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 			PlayerInputComponent->BindAction("Skill_4", IE_Pressed, this, &ACPP_Character::Skill_4);
 
 			PlayerInputComponent->BindAction("ExceptionalAttack_P1", IE_Pressed, this, &ACPP_Character::StartExceptionalAttack);
-		
-			/*
-				[ 22.12.08 ]
-				작성자 : 20181275 조준하
-			*/
-
-			// This will work for Player 1 assuming their inputs are filltered to only controls that they can use.
-			// PlayerInputComponent->BindAction("AddToInputBuffer", IE_Pressed, this, &ACPP_Character::AddInputToInputBuffer);
-		
-			/*
-				작성 종료
-			*/
 		}
 		else
 		{
@@ -205,18 +195,6 @@ void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 			PlayerInputComponent->BindAction("Uppercut_P2", IE_Pressed, this, &ACPP_Character::Uppercut);
 
 			PlayerInputComponent->BindAction("ExceptionalAttack_P2", IE_Pressed, this, &ACPP_Character::StartExceptionalAttack);
-		
-			/*
-				[ 22.12.08 ]
-				작성자 : 20181275 조준하
-			*/
-
-			// This will work for Player 2 assuming their inputs are filltered to only controls that they can use.
-			// PlayerInputComponent->BindAction("AddToInputBuffer", IE_Pressed, this, &ACPP_Character::AddInputToInputBuffer);
-
-			/*
-				작성 종료
-			*/
 		}
 	}
 
@@ -324,7 +302,7 @@ void ACPP_Character::R_Kick()
 
 void ACPP_Character::Uppercut()
 {
-	if (canMove && characterState != ECharacterState::VE_Dead)
+	if (canMove && command_Check && characterState != ECharacterState::VE_Dead)
 	{
 		PlayAnimMontage(uppercut, 0.7f, NAME_None);
 		wasLightAttackUsed = true;
@@ -468,7 +446,7 @@ void ACPP_Character::TakeDamage(float damageAmount, float hitstunTime, float blo
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Damege"));
 			MaxHealth -= damageAmount;
-			superMeterAmount += damageAmount * 8.5f;   
+			superMeterAmount += damageAmount * 5.85f;   
 
 			stunTime = hitstunTime;
 
@@ -496,7 +474,7 @@ void ACPP_Character::TakeDamage(float damageAmount, float hitstunTime, float blo
 		else
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Blocking"));
-			float reducedDamage = damageAmount * 3.0f;
+			float reducedDamage = damageAmount * 0.30f;
 			MaxHealth -= reducedDamage;
 			superMeterAmount += damageAmount * 4.0f;
 

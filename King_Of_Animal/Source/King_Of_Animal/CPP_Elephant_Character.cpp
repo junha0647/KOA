@@ -6,6 +6,8 @@
 ACPP_Elephant_Character::ACPP_Elephant_Character()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+
 }
 
 void ACPP_Elephant_Character::BeginPlay()
