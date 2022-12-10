@@ -42,6 +42,7 @@ ACPP_Character::ACPP_Character()
 	basicsDamageAmount = 5.0f;
 	SkillDamageAmount_1 = 10.0f;
 	gravityScaleModifier = 0.1f;
+	roundWon = 0;
 
 	wasLightAttackUsed = false;
 	wasMediumAttackUsed = false;
@@ -51,6 +52,7 @@ ACPP_Character::ACPP_Character()
 	wasMediumExAttackUsed = false;
 	wasHeavyExAttackUsed = false;
 	canUseExAttack = true;
+	hasLostRound = false;
 
 	PK_Check = true;
 	canMove = true;
@@ -58,6 +60,7 @@ ACPP_Character::ACPP_Character()
 	IsDie = false;
 	isCrouching = false;
 	isuppercut = false;
+
 
 	/*
 		[ 22.12.08 ]
@@ -796,3 +799,11 @@ void ACPP_Character::StartCommand(FString _commandName)
 /*
 	작성 종료
 */
+
+void ACPP_Character::WinRound()
+{
+	hasLostRound = true;
+	++roundWon;
+	NotifyRoundEnd();
+	UpdatePointIcon();
+}

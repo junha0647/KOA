@@ -385,4 +385,21 @@ public:
 
 	void CheckAttack_Implementation() override;
 
+	UFUNCTION(BlueprintCallable)
+		void WinRound();
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+		void NotifyRoundStart();
+
+	UFUNCTION(BlueprintImplementableEvent)
+		void NotifyRoundEnd();
+
+	UFUNCTION(BlueprintImplementableEvent)
+		void UpdatePointIcon();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int roundWon;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool hasLostRound;
 };
