@@ -14,13 +14,17 @@
 UENUM(BlueprintType)
 enum class ECharacterState : uint8
 {
-	VE_Default   UMETA(DisplayName = "NOT_MOVING"),
-	VE_Jumping   UMETA(DisplayName = "JUMPING"),
-	VE_Stunned   UMETA(DisplayName = "STUNNED"),
-	VE_Blocking  UMETA(DisplayName = "BLOCKING"),
-	VE_Crouching UMETA(DisplayName = "CROUCHING"),
-	VE_Dead      UMETA(DisplayName = "DEAD"),
-	VE_Launched  UMETA(DisplayName = "LAUNCHED")
+	VE_Default       UMETA(DisplayName = "NOT_MOVING"),
+	VE_MovingRight   UMETA(DisplayName = "MOVINGRIGHT"),
+	VE_MovingLeft    UMETA(DisplayName = "MOVINGLEFT"),
+	VE_Jumping       UMETA(DisplayName = "JUMPING"),
+	VE_Stunned       UMETA(DisplayName = "STUNNED"),
+	VE_Blocking      UMETA(DisplayName = "BLOCKING"),
+	VE_Crouching     UMETA(DisplayName = "CROUCHING"),
+	VE_Dead          UMETA(DisplayName = "DEAD"),
+	VE_Launched      UMETA(DisplayName = "LAUNCHED"),
+	VE_KnockedDown   UMETA(DisplayName = "KNOCKED DOWN"),
+	VE_Recovery      UMETA(DisplayName = "RECOVERY")
 };
 
 /*
@@ -267,6 +271,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attacks")
 	bool canUseExAttack;
 
+	// Has the aharacter been thrown?
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attacks")
+	//bool wasThrown;
+
 	// The amount of health the character currently has.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 	float MaxHealth;
@@ -308,9 +316,14 @@ public:
 	// The amount of super meter thr player has.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Super Meter")
 	float superMeterAmount;
+
 	// The amount of super meter thr player has.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Super Meter")
 	float currentsuperMeterAmount;
+
+	// The amount of super meter thr player has.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float gravityScaleModifier;
 
 public:
 	FName hitBone;

@@ -20,5 +20,8 @@ class KING_OF_ANIMAL_API UBaseGameInstance : public UGameInstance
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player References")
 	ECharacterClass characterClass;
-	
+
+	// Is the device intended to be used for multiple players
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Controller")
+	bool isDeviceForMultiplePlayers;
 };

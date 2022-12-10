@@ -2,6 +2,7 @@
 
 #include "Components/CapsuleComponent.h"
 #include "King_Of_AnimalGameMode.h"
+#include "BaseGameInstance.h"
 #include "CPP_Character.h"
 
 // Sets default values
@@ -42,6 +43,7 @@ ACPP_Character::ACPP_Character()
 	DamageAmount = 0.0f;
 	basicsDamageAmount = 5.0f;
 	SkillDamageAmount_1 = 10.0f;
+	gravityScaleModifier = 0.1f;
 
 	wasLightAttackUsed = false;
 	wasMediumAttackUsed = false;
@@ -125,6 +127,7 @@ void ACPP_Character::Tick(float DeltaTime)
 								scale = transform.GetScale3D();
 								scale.Y = -1.0f;
 								transform.SetScale3D(scale);
+
 								mesh->SetRelativeTransform(transform);
 							}
 							isFlipped = false;
@@ -140,6 +143,7 @@ void ACPP_Character::Tick(float DeltaTime)
 								scale = transform.GetScale3D();
 								scale.Y = 1.0f;
 								transform.SetScale3D(scale);
+
 								mesh->SetRelativeTransform(transform);
 							}
 							isFlipped = true;
@@ -160,86 +164,93 @@ void ACPP_Character::Tick(float DeltaTime)
 void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	if (auto gameMode = Cast<AKing_Of_AnimalGameMode>(GetWorld()->GetAuthGameMode())) {
+	if (auto gameMode = Cast<AKing_Of_AnimalGameMode>(GetWorld()->GetAuthGameMode()))
+	{
 		if (gameMode->player1 == this)
 		{
-			PlayerInputComponent->BindAction("JumpP1", IE_Pressed, this, &ACPP_Character::Jump);
-			PlayerInputComponent->BindAction("JumpP1", IE_Released, this, &ACPP_Character::StopJumping);
-			PlayerInputComponent->BindAction("Crouch_P1", IE_Pressed, this, &ACPP_Character::StartCrouching);
-			PlayerInputComponent->BindAction("Crouch_P1", IE_Released, this, &ACPP_Character::StopCrouching);
-
 			PlayerInputComponent->BindAxis("MoveRight_P1", this, &ACPP_Character::MoveRight);
-			// 때리기
-			PlayerInputComponent->BindAction("L_Punch_P1", IE_Pressed, this, &ACPP_Character::L_Punch);
-			PlayerInputComponent->BindAction("R_Punch_P1", IE_Pressed, this, &ACPP_Character::R_Punch);
-			PlayerInputComponent->BindAction("L_Kick_P1", IE_Pressed, this, &ACPP_Character::L_Kick);
-			PlayerInputComponent->BindAction("R_Kick_P1", IE_Pressed, this, &ACPP_Character::R_Kick);
-			PlayerInputComponent->BindAction("Uppercut_P1", IE_Pressed, this, &ACPP_Character::Uppercut);
-			PlayerInputComponent->BindAction("Skill_4", IE_Pressed, this, &ACPP_Character::Skill_4);
-
-			PlayerInputComponent->BindAction("ExceptionalAttack_P1", IE_Pressed, this, &ACPP_Character::StartExceptionalAttack);
 		}
 		else
 		{
-			PlayerInputComponent->BindAction("JumpP2", IE_Pressed, this, &ACPP_Character::Jump);
-			PlayerInputComponent->BindAction("JumpP2", IE_Released, this, &ACPP_Character::StopJumping);
-			PlayerInputComponent->BindAction("Crouch_P2", IE_Pressed, this, &ACPP_Character::StartCrouching);
-			PlayerInputComponent->BindAction("Crouch_P2", IE_Released, this, &ACPP_Character::StopCrouching);
-
 			PlayerInputComponent->BindAxis("MoveRight_P2", this, &ACPP_Character::MoveRight);
-			// 때리기
-			PlayerInputComponent->BindAction("L_Punch_P2", IE_Pressed, this, &ACPP_Character::L_Punch);
-			PlayerInputComponent->BindAction("R_Punch_P2", IE_Pressed, this, &ACPP_Character::R_Punch);
-			PlayerInputComponent->BindAction("L_Kick_P2", IE_Pressed, this, &ACPP_Character::L_Kick);
-			PlayerInputComponent->BindAction("R_Kick_P2", IE_Pressed, this, &ACPP_Character::R_Kick);
-			PlayerInputComponent->BindAction("Uppercut_P2", IE_Pressed, this, &ACPP_Character::Uppercut);
-
-			PlayerInputComponent->BindAction("ExceptionalAttack_P2", IE_Pressed, this, &ACPP_Character::StartExceptionalAttack);
 		}
+
+		PlayerInputComponent->BindAction("JumpP1", IE_Pressed, this, &ACPP_Character::Jump);
+		PlayerInputComponent->BindAction("JumpP1", IE_Released, this, &ACPP_Character::StopJumping);
+		PlayerInputComponent->BindAction("Crouch_P1", IE_Pressed, this, &ACPP_Character::StartCrouching);
+		PlayerInputComponent->BindAction("Crouch_P1", IE_Released, this, &ACPP_Character::StopCrouching);
+
+		// 때리기
+		PlayerInputComponent->BindAction("L_Punch_P1", IE_Pressed, this, &ACPP_Character::L_Punch);
+		PlayerInputComponent->BindAction("R_Punch_P1", IE_Pressed, this, &ACPP_Character::R_Punch);
+		PlayerInputComponent->BindAction("L_Kick_P1", IE_Pressed, this, &ACPP_Character::L_Kick);
+		PlayerInputComponent->BindAction("R_Kick_P1", IE_Pressed, this, &ACPP_Character::R_Kick);
+
+		PlayerInputComponent->BindAction("Uppercut_P1", IE_Pressed, this, &ACPP_Character::Uppercut);
+		PlayerInputComponent->BindAction("Skill_4", IE_Pressed, this, &ACPP_Character::Skill_4);
+		PlayerInputComponent->BindAction("ExceptionalAttack_P1", IE_Pressed, this, &ACPP_Character::StartExceptionalAttack);
+
 	}
 
 }
 
 void ACPP_Character::MoveRight(float axis)
 {
-	if (canMove && characterState != ECharacterState::VE_Crouching && characterState != ECharacterState::VE_Dead)
+	if (auto baseGameInstance = Cast<UBaseGameInstance>(GetGameInstance()))
 	{
-		if (characterState != ECharacterState::VE_Launched && characterState != ECharacterState::VE_Jumping) {
-			if (axis < 0.05f && axis > -0.05f)
-			{
-				characterState = ECharacterState::VE_Blocking;
-
-			}
-			else
-			{
-				characterState = ECharacterState::VE_Default;
-			}
-		}
-
-
-		float currentDistanceApart = abs(opponent->GetActorLocation().Y - GetActorLocation().Y);
-
-		if ((currentDistanceApart >= maxDistanceApart))
+		if (baseGameInstance->isDeviceForMultiplePlayers)
 		{
-			if ((currentDistanceApart + axis < currentDistanceApart) || (currentDistanceApart - axis < currentDistanceApart))
+			if (canMove && characterState != ECharacterState::VE_Crouching && characterState != ECharacterState::VE_Dead && characterState != ECharacterState::VE_KnockedDown && characterState != ECharacterState::VE_Recovery)
 			{
-				AddMovementInput(GetActorForwardVector(), axis);
+				if (characterState != ECharacterState::VE_Launched && characterState != ECharacterState::VE_Jumping)
+				{
+					if (axis > 0.05f)
+					{
+						characterState = ECharacterState::VE_MovingRight;
+
+					}
+					else if (axis < -0.05f)
+					{
+						characterState = ECharacterState::VE_MovingLeft;
+					}
+					else
+					{
+						characterState = ECharacterState::VE_Blocking;
+					}
+				}
+
+
+				float currentDistanceApart = abs(opponent->GetActorLocation().Y - GetActorLocation().Y);
+
+				if ((currentDistanceApart >= maxDistanceApart))
+				{
+					if ((currentDistanceApart + axis < currentDistanceApart && !isFlipped) || (currentDistanceApart - axis < currentDistanceApart && isFlipped))
+					{
+						//AddMovementInput(GetActorForwardVector(), axis);
+						AddMovementInput(FVector(0.0f, 1.0f, 0.0f), axis);
+					}
+				}
+				else
+				{
+					//AddMovementInput(GetActorForwardVector(), axis);
+					AddMovementInput(FVector(0.0f, 1.0f, 0.0f), axis);
+				}
+
 			}
 		}
-		else
-		{
-			AddMovementInput(GetActorForwardVector(), axis);
-		}
-
 	}
 }
 
 void ACPP_Character::Jump()
 {
-	if (canMove && characterState != ECharacterState::VE_Dead && characterState != ECharacterState::VE_Launched)
+	if (canMove && characterState != ECharacterState::VE_Dead && characterState != ECharacterState::VE_Launched && characterState != ECharacterState::VE_KnockedDown && characterState != ECharacterState::VE_Recovery)
 	{
 		ACharacter::Jump();
 		characterState = ECharacterState::VE_Jumping;
+	}
+	else if (characterState == ECharacterState::VE_KnockedDown)
+	{
+		characterState = ECharacterState::VE_Recovery;
 	}
 }
 
@@ -250,15 +261,23 @@ void ACPP_Character::StopJumping()
 
 void ACPP_Character::Landed()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("upper_End"));
-	GetCharacterMovement()->GravityScale = gravityScale;
-	opponent->launchDistance = 0.0f;
-	characterState = ECharacterState::VE_Default;
+	if (characterState == ECharacterState::VE_Launched)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("upper_End"));
+		GetCharacterMovement()->GravityScale = gravityScale;
+		opponent->launchDistance = 0.0f;
+		characterState = ECharacterState::VE_KnockedDown;
+	}
 }
 
 void ACPP_Character::L_Punch()
 {
-	if (l_punch && canMove && PK_Check && characterState != ECharacterState::VE_Dead)
+	if (characterCommands[0].hasUsedCommand && canMove && command_Check && characterState != ECharacterState::VE_Dead)
+	{
+		wasLightAttackUsed = true;
+		StartExceptionalAttack();
+	}
+	else if (l_punch && canMove && PK_Check && characterState != ECharacterState::VE_Dead)
 	{
 		PlayAnimMontage(l_punch, 1, NAME_None);
 		DamageAmount = basicsDamageAmount;
@@ -268,11 +287,7 @@ void ACPP_Character::L_Punch()
 
 void ACPP_Character::R_Punch()
 {
-	if (characterCommands[0].hasUsedCommand && canMove && command_Check && characterState != ECharacterState::VE_Dead)
-	{
-		Uppercut();
-	}
-	else if (r_punch && canMove && PK_Check && characterState != ECharacterState::VE_Dead)
+	if (r_punch && canMove && PK_Check && characterState != ECharacterState::VE_Dead)
 	{
 		PlayAnimMontage(r_punch, 1, NAME_None);
 		DamageAmount = basicsDamageAmount;
@@ -292,7 +307,12 @@ void ACPP_Character::L_Kick()
 
 void ACPP_Character::R_Kick()
 {
-	if (r_kick && canMove && PK_Check && characterState != ECharacterState::VE_Dead)
+	if (characterCommands[2].hasUsedCommand && canMove && command_Check && characterState != ECharacterState::VE_Dead)
+	{
+		wasHeavyAttackUsed = true;
+		StartExceptionalAttack();
+	}
+	else if (r_kick && canMove && PK_Check && characterState != ECharacterState::VE_Dead)
 	{
 		PlayAnimMontage(r_kick, 1, NAME_None);
 		DamageAmount = basicsDamageAmount;
@@ -307,7 +327,6 @@ void ACPP_Character::Uppercut()
 		PlayAnimMontage(uppercut, 0.7f, NAME_None);
 		wasLightAttackUsed = true;
 		PK_Check = false;
-		command_Check = false;
 		DamageAmount = SkillDamageAmount_1;
 		launchDistance = 500.0f;
 		characterCommands[0].hasUsedCommand = false;
@@ -316,12 +335,10 @@ void ACPP_Character::Uppercut()
 
 void ACPP_Character::Skill_4()
 {
-	if (superMeterAmount >= 100.0f)
+	if (skill_4 && canMove && characterState != ECharacterState::VE_Dead)
 	{
-		if (skill_4 && canMove && PK_Check && characterState != ECharacterState::VE_Dead)
-		{
-			PlayAnimMontage(skill_4, 1, NAME_None);
-		}
+		PlayAnimMontage(skill_4, 1, NAME_None);
+		wasHeavyAttackUsed = true;
 	}
 }
 
@@ -329,20 +346,25 @@ void ACPP_Character::StartExceptionalAttack()
 {
 	if (wasLightAttackUsed && superMeterAmount >= 20.0f && canUseExAttack)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("LightAttack"));
 		wasLightExAttackUsed = true;
+		Uppercut();
+		command_Check = false;
 		DamageAmount = 20.0f;
 		superMeterAmount -= 20.0f;
 	}
-	else if (wasMediumAttackUsed && superMeterAmount >= 35.0f && canUseExAttack)
+	else if (wasMediumAttackUsed && superMeterAmount >= 50.0f && canUseExAttack)
 	{
 		wasMediumExAttackUsed = true;
-		superMeterAmount -= 35.0f;
+		DamageAmount = 25.0f;
+		superMeterAmount -= 50.0f;
 	}
-	else if (wasHeavyAttackUsed && superMeterAmount >= 50.0f && canUseExAttack)
+	else if (wasHeavyAttackUsed && superMeterAmount >= 90.0f && canUseExAttack)
 	{
 		wasHeavyExAttackUsed = true;
-		superMeterAmount -= 50.0f;
+		Skill_4();
+		command_Check = false;
+		DamageAmount = 15.0f;
+		superMeterAmount -= 100.0f;
 	}
 
 	if (superMeterAmount < 0.00f)
@@ -388,10 +410,11 @@ void ACPP_Character::PerformPushback(float pushbackAmount, float launchAmount, b
 			characterState = ECharacterState::VE_Launched;
 			isuppercut = true;
 			canMove = false;
-			GetCharacterMovement()->GravityScale *= 0.5f;
-			GetWorld()->GetTimerManager().SetTimer(uppercutTimerHandle, this, &ACPP_Character::Landed, 0.1f, false);
+			GetCharacterMovement()->GravityScale = gravityScale * gravityScaleModifier;
+			gravityScaleModifier += 0.1f;
+			GetWorld()->GetTimerManager().SetTimer(uppercutTimerHandle, this, &ACPP_Character::Landed, 0.3f, false);
 		}
-		
+
 		if (isFlipped)
 		{
 			LaunchCharacter(FVector(0.0f, -pushbackAmount, launchAmount), false, false);
@@ -400,7 +423,7 @@ void ACPP_Character::PerformPushback(float pushbackAmount, float launchAmount, b
 		{
 			LaunchCharacter(FVector(0.0f, pushbackAmount, launchAmount), false, false);
 		}
-		
+
 	}
 }
 
@@ -440,18 +463,18 @@ void ACPP_Character::PunchReast()
 // 적에게 적용되는 식
 void ACPP_Character::TakeDamage(float damageAmount, float hitstunTime, float blockstunTime, float pushbackAmount, float launchAmount)
 {
-	if (characterState != ECharacterState::VE_Dead) 
+	if (characterState != ECharacterState::VE_Dead)
 	{
 		if (characterState != ECharacterState::VE_Blocking)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Damege"));
 			MaxHealth -= damageAmount;
-			superMeterAmount += damageAmount * 5.85f;   
+			superMeterAmount += damageAmount * 5.85f;
 
 			stunTime = hitstunTime;
 
-			
-			if (launchAmount > 0) 
+
+			if (launchAmount > 0)
 			{
 				PerformPushback(pushbackAmount, launchAmount, false);
 			}
@@ -499,7 +522,7 @@ void ACPP_Character::TakeDamage(float damageAmount, float hitstunTime, float blo
 			{
 				opponent->PerformPushback(pushbackAmount, 0.0f, false);
 			}*/
-			
+
 			PerformPushback(pushbackAmount, launchAmount, true);
 		}
 	}
