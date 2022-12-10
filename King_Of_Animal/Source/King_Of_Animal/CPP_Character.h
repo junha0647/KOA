@@ -8,6 +8,7 @@
 #include <Camera/CameraComponent.h>
 #include <GameFramework/CharacterMovementComponent.h>
 #include "FightInterface.h"
+#include "BaseGameInstance.h"
 
 #include "CPP_Character.generated.h"
 
@@ -41,7 +42,6 @@ enum class EInputType : uint8
 	E_Backward		UMETA(DisplayName = "BACKWARD"),
 	E_Jump			UMETA(DisplayName = "JUMP"),
 	E_Crouch		UMETA(DisplayName = "CROUCH"),
-	//E_Block			UMETA(DisplayName = "BLOCK"),
 	E_LeftPunch		UMETA(DisplayName = "LEFTPUNCH"),
 	E_RightPunch	UMETA(DisplayName = "RIGHTPUNCH"),
 	E_LeftKick		UMETA(DisplayName = "LEFTKICK"),
@@ -184,7 +184,8 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void StartCommand(FString _commandName);
 
-	
+	UFUNCTION(BlueprintImplementableEvent)
+	void NotifyPlayerLockedIn();
 
 	// The map of inputs-to-InputTypes for access when determining if the player controlling this character has used a recognized input.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
@@ -245,7 +246,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	ECharacterState characterState;
 
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Check")
 	bool PK_Check;
 
@@ -304,6 +304,9 @@ public:
 	// Has the aharacter been thrown?
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attacks")
 	//bool wasThrown;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input Stack")
+	bool isPlayerOne;
 
 	// The amount of health the character currently has.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")

@@ -4,11 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "CPP_Character.h"
+
 #include "CPP_Elephant_Character.generated.h"
 
 /**
  * 
  */
+
 UCLASS()
 class KING_OF_ANIMAL_API ACPP_Elephant_Character : public ACPP_Character
 {
@@ -24,5 +26,4 @@ public:
 	virtual void Tick(float DeltaTiem) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
 };
