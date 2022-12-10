@@ -11,6 +11,8 @@
 
 #include "CPP_Character.generated.h"
 
+
+
 UENUM(BlueprintType)
 enum class ECharacterState : uint8
 {
@@ -28,9 +30,23 @@ enum class ECharacterState : uint8
 };
 
 /*
-	[ 22.12.08 ]
 	작성자 : 20181275 조준하
 */
+
+UENUM(BlueprintType)
+enum class EInputType : uint8
+{
+	E_None			UMETA(DisplayName = "NONE"),
+	E_Forward		UMETA(DisplayName = "FORWARD"),
+	E_Backward		UMETA(DisplayName = "BACKWARD"),
+	E_Jump			UMETA(DisplayName = "JUMP"),
+	E_Crouch		UMETA(DisplayName = "CROUCH"),
+	//E_Block			UMETA(DisplayName = "BLOCK"),
+	E_LeftPunch		UMETA(DisplayName = "LEFTPUNCH"),
+	E_RightPunch	UMETA(DisplayName = "RIGHTPUNCH"),
+	E_LeftKick		UMETA(DisplayName = "LEFTKICK"),
+	E_RightKick		UMETA(DisplayName = "RIGHTKICK")
+};
 
 USTRUCT(BlueprintType)
 struct FCommand
@@ -40,6 +56,9 @@ struct FCommand
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	FString name;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	TArray<EInputType> inputTypes;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	TArray<FString> inputs;
@@ -54,6 +73,9 @@ struct FInputInfo
 	GENERATED_BODY();
 
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	EInputType inputType;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	FString inputName;
 
@@ -140,9 +162,11 @@ protected:
 	FName GetClosestBone(FVector hitBonelocation, float maxDistance);
 
 	/*
-		[ 22.12.08 ]
 		작성자 : 20181275 조준하
 	*/
+
+	UFUNCTION(BlueprintCallable)
+	void AddToInputMap(FString _input, EInputType _type);
 
 	// Adds inputs to the input buffer.
 	UFUNCTION(BlueprintCallable)
@@ -152,13 +176,19 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void CheckInputBufferForCommand();
 
+	// Check if the input buffer contains any sequences from the character's list of commands using input types.
+	UFUNCTION(BlueprintCallable)
+	void CheckInputBufferForCommandUsingType();
+
 	// Make the character begin using a command based off of the command's name.
 	UFUNCTION(BlueprintCallable)
 	void StartCommand(FString _commandName);
 
-	// Removes inputs from the input buffer.
-	UFUNCTION(BlueprintCallable)
-	void RemoveInputFromInputBuffer();
+	
+
+	// The map of inputs-to-InputTypes for access when determining if the player controlling this character has used a recognized input.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	TMap<FString, EInputType> inputToInputTypeMap;
 
 	// The array of inputs the player controlling this character has performed.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")

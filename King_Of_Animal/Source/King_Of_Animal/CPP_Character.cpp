@@ -22,10 +22,8 @@ ACPP_Character::ACPP_Character()
 	//CameraBoom->SetupAttachment(RootComponent);
 	//CameraBoom->SetRelativeRotation(FRotator(0, -90, 0));
 
-
 	//PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCamera"));
 	//PlayerCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
-
 
 	characterState = ECharacterState::VE_Default;
 	opponent = nullptr;
@@ -71,6 +69,9 @@ ACPP_Character::ACPP_Character()
 
 	// Command #1 assignments.
 	characterCommands[0].name = "Command #1";
+	characterCommands[0].inputTypes.Add(EInputType::E_Backward);
+	characterCommands[0].inputTypes.Add(EInputType::E_Forward);
+	characterCommands[0].inputTypes.Add(EInputType::E_LeftPunch);
 	characterCommands[0].inputs.Add("A");
 	characterCommands[0].inputs.Add("D");
 	characterCommands[0].inputs.Add("Y");
@@ -79,6 +80,9 @@ ACPP_Character::ACPP_Character()
 
 	// Command #2 assignments.
 	characterCommands[1].name = "Command #2";
+	characterCommands[1].inputTypes.Add(EInputType::E_Forward);
+	characterCommands[1].inputTypes.Add(EInputType::E_Forward);
+	characterCommands[1].inputTypes.Add(EInputType::E_RightKick);
 	characterCommands[1].inputs.Add("D");
 	characterCommands[1].inputs.Add("D");
 	characterCommands[1].inputs.Add("J");
@@ -87,6 +91,9 @@ ACPP_Character::ACPP_Character()
 
 	// Command #3 assignments.
 	characterCommands[2].name = "Ult";
+	characterCommands[2].inputTypes.Add(EInputType::E_Forward);
+	characterCommands[2].inputTypes.Add(EInputType::E_LeftKick);
+	characterCommands[2].inputTypes.Add(EInputType::E_RightKick);
 	characterCommands[2].inputs.Add("D");
 	characterCommands[2].inputs.Add("H");
 	characterCommands[2].inputs.Add("J");
@@ -685,11 +692,15 @@ void ACPP_Character::CheckAttack_Implementation()
 	작성자 : 20181275 조준하
 */
 
+void ACPP_Character::AddToInputMap(FString _input, EInputType _type)
+{
+	inputToInputTypeMap.Add(_input, _type);
+}
+
 void ACPP_Character::AddInputToInputBuffer(FInputInfo _inputInfo)
 {
 	inputBuffer.Add(_inputInfo);
-	CheckInputBufferForCommand();
-	// GetWorld()->GetTimerManager().SetTimer(inputBufferTimerHandle, this, &ACPP_Character::RemoveInputFromInputBuffer, removeInputFromBufferTime, false);
+	CheckInputBufferForCommandUsingType();
 }
 
 void ACPP_Character::CheckInputBufferForCommand()
@@ -731,6 +742,45 @@ void ACPP_Character::CheckInputBufferForCommand()
 	}
 }
 
+void ACPP_Character::CheckInputBufferForCommandUsingType()
+{
+	int correctSequenceCounter = 0;
+
+	for (auto currentCommand : characterCommands)
+	{
+		for (int commandInput = 0; commandInput < currentCommand.inputTypes.Num(); ++commandInput)
+		{
+			for (int input = 0; input < inputBuffer.Num(); ++input)
+			{
+				if (input + correctSequenceCounter < inputBuffer.Num())
+				{
+					if (inputBuffer[input + correctSequenceCounter].inputType == (currentCommand.inputTypes[commandInput]))
+					{
+						UE_LOG(LogTemp, Warning, TEXT("The player added another input to the command sequence."));
+						++correctSequenceCounter;
+
+						if (correctSequenceCounter == currentCommand.inputTypes.Num())
+						{
+							StartCommand(currentCommand.name);
+						}
+						break;
+					}
+					else
+					{
+						UE_LOG(LogTemp, Warning, TEXT("The player broke the command sequence."));
+						correctSequenceCounter = 0;
+					}
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("The player is not yet finished with the command sequence."));
+					correctSequenceCounter = 0;
+				}
+			}
+		}
+	}
+}
+
 void ACPP_Character::StartCommand(FString _commandName)
 {
 	for (int currentCommand = 0; currentCommand < characterCommands.Num(); ++currentCommand)
@@ -741,11 +791,6 @@ void ACPP_Character::StartCommand(FString _commandName)
 			characterCommands[currentCommand].hasUsedCommand = true;
 		}
 	}
-}
-
-void ACPP_Character::RemoveInputFromInputBuffer()
-{
-
 }
 
 /*
