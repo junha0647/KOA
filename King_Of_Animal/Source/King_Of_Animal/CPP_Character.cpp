@@ -2,7 +2,6 @@
 
 #include "Components/CapsuleComponent.h"
 #include "King_Of_AnimalGameMode.h"
-#include "BaseGameInstance.h"
 #include "CPP_Character.h"
 
 // Sets default values
@@ -26,6 +25,7 @@ ACPP_Character::ACPP_Character()
 	//PlayerCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 
 	characterState = ECharacterState::VE_Default;
+	//characterClass = ECharacterClass::VE_Default;
 	opponent = nullptr;
 	transform = FTransform();
 	scale = FVector(0.0f, 0.0f, 0.0f);
@@ -60,54 +60,6 @@ ACPP_Character::ACPP_Character()
 	IsDie = false;
 	isCrouching = false;
 	isuppercut = false;
-
-
-	/*
-		[ 22.12.08 ]
-		작성자 : 20181275 조준하
-	*/
-
-	// Create and assign the character's commands.
-	characterCommands.SetNum(3);
-
-	// Command #1 assignments.
-	characterCommands[0].name = "Command #1";
-	characterCommands[0].inputTypes.Add(EInputType::E_Backward);
-	characterCommands[0].inputTypes.Add(EInputType::E_Forward);
-	characterCommands[0].inputTypes.Add(EInputType::E_LeftPunch);
-	characterCommands[0].inputs.Add("A");
-	characterCommands[0].inputs.Add("D");
-	characterCommands[0].inputs.Add("Y");
-	characterCommands[0].hasUsedCommand = false;
-	// 어퍼컷
-
-	// Command #2 assignments.
-	characterCommands[1].name = "Command #2";
-	characterCommands[1].inputTypes.Add(EInputType::E_Forward);
-	characterCommands[1].inputTypes.Add(EInputType::E_Forward);
-	characterCommands[1].inputTypes.Add(EInputType::E_RightKick);
-	characterCommands[1].inputs.Add("D");
-	characterCommands[1].inputs.Add("D");
-	characterCommands[1].inputs.Add("J");
-	characterCommands[1].hasUsedCommand = false;
-	// 돌려차기
-
-	// Command #3 assignments.
-	characterCommands[2].name = "Ult";
-	characterCommands[2].inputTypes.Add(EInputType::E_Forward);
-	characterCommands[2].inputTypes.Add(EInputType::E_LeftKick);
-	characterCommands[2].inputTypes.Add(EInputType::E_RightKick);
-	characterCommands[2].inputs.Add("D");
-	characterCommands[2].inputs.Add("H");
-	characterCommands[2].inputs.Add("J");
-	characterCommands[2].hasUsedCommand = false;
-	// 필살기
-
-	command_Check = true;
-
-	/*
-		작성 종료
-	*/
 }
 
 // Called when the game starts or when spawned
@@ -179,11 +131,16 @@ void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		if (gameMode->player1 == this)
 		{
 			PlayerInputComponent->BindAxis("MoveRight_P1", this, &ACPP_Character::MoveRight);
+			isPlayerOne = true;
 		}
 		else
 		{
 			PlayerInputComponent->BindAxis("MoveRight_P2", this, &ACPP_Character::MoveRight);
+			isPlayerOne = false;
 		}
+
+		// The input mappings are ready to be used by the commands.
+		NotifyPlayerLockedIn();
 
 		PlayerInputComponent->BindAction("JumpP1", IE_Pressed, this, &ACPP_Character::Jump);
 		PlayerInputComponent->BindAction("JumpP1", IE_Released, this, &ACPP_Character::StopJumping);
