@@ -25,7 +25,6 @@ ACPP_Character::ACPP_Character()
 	//PlayerCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 
 	characterState = ECharacterState::VE_Default;
-	//characterClass = ECharacterClass::VE_Default;
 	opponent = nullptr;
 	transform = FTransform();
 	scale = FVector(0.0f, 0.0f, 0.0f);
@@ -667,7 +666,7 @@ void ACPP_Character::AddToInputMap(FString _input, EInputType _type)
 
 void ACPP_Character::AddInputToInputBuffer(FInputInfo _inputInfo)
 {
-	if (!isFlipped)
+	/*if (!isFlipped)
 	{
 		if (_inputInfo.inputType == EInputType::E_Forward)
 		{
@@ -677,7 +676,7 @@ void ACPP_Character::AddInputToInputBuffer(FInputInfo _inputInfo)
 		{
 			_inputInfo.inputType = EInputType::E_Forward;
 		}
-	}
+	}*/
 
 	inputBuffer.Add(_inputInfo);
 	CheckInputBufferForCommandUsingType();
@@ -685,82 +684,118 @@ void ACPP_Character::AddInputToInputBuffer(FInputInfo _inputInfo)
 
 void ACPP_Character::CheckInputBufferForCommand()
 {
+	int correctSequenceCounter = 0;
+
+	for (auto currentCommand : characterCommands)
+	{
+		for (int commandInput = 0; commandInput < currentCommand.inputs.Num(); ++commandInput)
+		{
+			for (int input = 0; input < inputBuffer.Num(); ++input)
+			{
+				if (input + correctSequenceCounter < inputBuffer.Num())
+				{
+					if (inputBuffer[input + correctSequenceCounter].inputName.Compare(currentCommand.inputs[commandInput]) == 0)
+					{
+						UE_LOG(LogTemp, Warning, TEXT("The player added another input to the command sequence."));
+						++correctSequenceCounter;
+
+						if (correctSequenceCounter == currentCommand.inputs.Num())
+						{
+							StartCommand(currentCommand.name);
+						}
+						break;
+					}
+					else
+					{
+						UE_LOG(LogTemp, Warning, TEXT("The player broke the command sequence."));
+						correctSequenceCounter = 0;
+					}
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("The player is not yet finished with the command sequence."));
+					correctSequenceCounter = 0;
+				}
+			}
+		}
+	}
+}
+
+void ACPP_Character::CheckInputBufferForCommandUsingType()
+{
 	//int correctSequenceCounter = 0;
 
 	//for (auto currentCommand : characterCommands)
 	//{
-	//	for (int commandInput = 0; commandInput < currentCommand.inputs.Num(); ++commandInput)
+	//	for (int input = 0; input < inputBuffer.Num(); ++input)
+	//	{
+	//		inputBuffer[input].wasUsed = false; // wasUsed´Â ¹«½¼ º¯¼ö?
+	//	}
+
+	//	for (int commandInput = 0; commandInput < currentCommand.inputTypes.Num(); ++commandInput)
 	//	{
 	//		for (int input = 0; input < inputBuffer.Num(); ++input)
 	//		{
 	//			if (input + correctSequenceCounter < inputBuffer.Num())
 	//			{
-	//				if (inputBuffer[input + correctSequenceCounter].inputName.Compare(currentCommand.inputs[commandInput]) == 0)
+	//				if (!inputBuffer[input + correctSequenceCounter].wasUsed && inputBuffer[input + correctSequenceCounter].inputType == (currentCommand.inputTypes[commandInput]))
 	//				{
-	//					UE_LOG(LogTemp, Warning, TEXT("The player added another input to the command sequence."));
+	//					//UE_LOG(LogTemp, Warning, TEXT("The player added another input to the command sequence."));
+	//					inputBuffer[input + correctSequenceCounter].wasUsed = true;
 	//					++correctSequenceCounter;
 
-	//					if (correctSequenceCounter == currentCommand.inputs.Num())
+	//					if (correctSequenceCounter == currentCommand.inputTypes.Num())
 	//					{
 	//						StartCommand(currentCommand.name);
+	//						correctSequenceCounter = 0;
 	//					}
 	//					break;
 	//				}
 	//				else
 	//				{
-	//					UE_LOG(LogTemp, Warning, TEXT("The player broke the command sequence."));
+	//					//UE_LOG(LogTemp, Warning, TEXT("The player broke the command sequence."));
 	//					correctSequenceCounter = 0;
 	//				}
 	//			}
 	//			else
 	//			{
-	//				UE_LOG(LogTemp, Warning, TEXT("The player is not yet finished with the command sequence."));
+	//				//UE_LOG(LogTemp, Warning, TEXT("The player is not yet finished with the command sequence."));
 	//				correctSequenceCounter = 0;
 	//			}
 	//		}
 	//	}
 	//}
-}
 
-void ACPP_Character::CheckInputBufferForCommandUsingType()
-{
 	int correctSequenceCounter = 0;
 
 	for (auto currentCommand : characterCommands)
 	{
-		for (int input = 0; input < inputBuffer.Num(); ++input)
-		{
-			inputBuffer[input].wasUsed = false; // wasUsed´Â ¹«½¼ º¯¼ö?
-		}
-
 		for (int commandInput = 0; commandInput < currentCommand.inputTypes.Num(); ++commandInput)
 		{
 			for (int input = 0; input < inputBuffer.Num(); ++input)
 			{
 				if (input + correctSequenceCounter < inputBuffer.Num())
 				{
-					if (!inputBuffer[input + correctSequenceCounter].wasUsed && inputBuffer[input + correctSequenceCounter].inputType == (currentCommand.inputTypes[commandInput]))
+					if (inputBuffer[input + correctSequenceCounter].inputType == (currentCommand.inputTypes[commandInput]))
 					{
-						//UE_LOG(LogTemp, Warning, TEXT("The player added another input to the command sequence."));
-						inputBuffer[input + correctSequenceCounter].wasUsed = true;
+						UE_LOG(LogTemp, Warning, TEXT("The player added another input to the command sequence."));
 						++correctSequenceCounter;
 
-						if (correctSequenceCounter == currentCommand.inputTypes.Num())
+						if (correctSequenceCounter == currentCommand.inputs.Num())
 						{
 							StartCommand(currentCommand.name);
-							correctSequenceCounter = 0;
 						}
 						break;
 					}
 					else
 					{
-						//UE_LOG(LogTemp, Warning, TEXT("The player broke the command sequence."));
+						UE_LOG(LogTemp, Warning, TEXT("The player broke the command sequence."));
 						correctSequenceCounter = 0;
 					}
 				}
 				else
 				{
-					//UE_LOG(LogTemp, Warning, TEXT("The player is not yet finished with the command sequence."));
+					UE_LOG(LogTemp, Warning, TEXT("The player is not yet finished with the command sequence."));
 					correctSequenceCounter = 0;
 				}
 			}

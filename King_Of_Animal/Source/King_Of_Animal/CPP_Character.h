@@ -62,6 +62,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	TArray<EInputType> inputTypes;
 
+	// new
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	TArray<FString> inputs;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	bool hasUsedCommand;
 };
