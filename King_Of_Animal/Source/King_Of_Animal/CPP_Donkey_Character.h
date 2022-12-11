@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
 #include "CPP_Character.h"
+
 #include "CPP_Donkey_Character.generated.h"
 
 /**
