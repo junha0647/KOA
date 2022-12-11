@@ -113,9 +113,10 @@ protected:
 	void R_Punch();
 	void L_Kick();
 	void R_Kick();
-	void Uppercut();
 	void StartExceptionalAttack();
-	void Skill_4();
+	void Skill_1();
+	void Skill_2();
+	void Skill_Ult();
 
 	// player Hit
 	void PunchReast();
@@ -159,9 +160,13 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void StopJump_P2();
 	UFUNCTION(BlueprintCallable)
-	void Uppercut_P2();
-	UFUNCTION(BlueprintCallable)
 	void StartExceptionalAttack_P2();
+	UFUNCTION(BlueprintCallable)
+	void Skill_1_P2();
+	UFUNCTION(BlueprintCallable)
+	void Skill_2_P2();
+	UFUNCTION(BlueprintCallable)
+	void Skill_Ult_P2();
 
 
 
@@ -233,9 +238,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
 	UAnimMontage* blocking;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
-	UAnimMontage* uppercut;
+	UAnimMontage* skill_1;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
-	UAnimMontage* skill_4;
+	UAnimMontage* skill_2;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
+	UAnimMontage* skill_Ult;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player References")
 	ACPP_Character* opponent;

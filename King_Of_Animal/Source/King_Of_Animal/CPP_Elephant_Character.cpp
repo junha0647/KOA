@@ -28,20 +28,20 @@ ACPP_Elephant_Character::ACPP_Elephant_Character()
 	characterCommands[1].name = "Command #2";
 	characterCommands[1].inputTypes.Add(EInputType::E_Forward); // D or →
 	characterCommands[1].inputTypes.Add(EInputType::E_Forward); // D or →
-	characterCommands[1].inputTypes.Add(EInputType::E_RightKick); // J or Num6
+	characterCommands[1].inputTypes.Add(EInputType::E_LeftKick); // H or Num6
 	characterCommands[1].inputs.Add("D");
 	characterCommands[1].inputs.Add("D");
-	characterCommands[1].inputs.Add("J");
+	characterCommands[1].inputs.Add("H");
 	characterCommands[1].hasUsedCommand = false;
 	// 돌려차기
 
 	// Command #3 assignments.
 	characterCommands[2].name = "Ult";
-	characterCommands[2].inputTypes.Add(EInputType::E_Forward); // D or →
-	characterCommands[2].inputTypes.Add(EInputType::E_LeftKick); // H or Num5
+	characterCommands[2].inputTypes.Add(EInputType::E_Crouch); // D or →
+	characterCommands[2].inputTypes.Add(EInputType::E_Forward); // H or Num5
 	characterCommands[2].inputTypes.Add(EInputType::E_RightKick); // J or Num6
+	characterCommands[2].inputs.Add("S");
 	characterCommands[2].inputs.Add("D");
-	characterCommands[2].inputs.Add("H");
 	characterCommands[2].inputs.Add("J");
 	characterCommands[2].hasUsedCommand = false;
 	// 필살기

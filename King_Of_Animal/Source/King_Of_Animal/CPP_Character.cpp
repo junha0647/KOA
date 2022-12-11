@@ -62,6 +62,44 @@ ACPP_Character::ACPP_Character()
 
 	shouldGroundBounce = false;
 	shouldWallBounce = false;
+
+	// Create and assign the character's commands.
+	characterCommands.SetNum(3); 
+
+	// Command #1 assignments.
+	characterCommands[0].name = "Command #1";
+	//characterCommands[0].inputTypes.Add(EInputType::E_Backward); // D or →
+	characterCommands[0].inputTypes.Add(EInputType::E_Forward); // Y or Num8
+	characterCommands[0].inputTypes.Add(EInputType::E_LeftPunch); // U or Num9
+	//characterCommands[0].inputs.Add("A");
+	characterCommands[0].inputs.Add("D");
+	characterCommands[0].inputs.Add("Y");
+	characterCommands[0].hasUsedCommand = false;
+	// 어퍼컷
+
+	// Command #2 assignments.
+	characterCommands[1].name = "Command #2";
+	characterCommands[1].inputTypes.Add(EInputType::E_Forward); // D or →
+	characterCommands[1].inputTypes.Add(EInputType::E_Forward); // D or →
+	characterCommands[1].inputTypes.Add(EInputType::E_LeftKick); // H or Num6
+	characterCommands[1].inputs.Add("D");
+	characterCommands[1].inputs.Add("D");
+	characterCommands[1].inputs.Add("H");
+	characterCommands[1].hasUsedCommand = false;
+	// 돌려차기
+
+	// Command #3 assignments.
+	characterCommands[2].name = "Ult";
+	characterCommands[2].inputTypes.Add(EInputType::E_Crouch); // D or →
+	characterCommands[2].inputTypes.Add(EInputType::E_Forward); // H or Num5
+	characterCommands[2].inputTypes.Add(EInputType::E_RightKick); // J or Num6
+	characterCommands[2].inputs.Add("S");
+	characterCommands[2].inputs.Add("D");
+	characterCommands[2].inputs.Add("J");
+	characterCommands[2].hasUsedCommand = false;
+	// 필살기
+
+	command_Check = true;
 }
 
 // Called when the game starts or when spawned
@@ -155,9 +193,10 @@ void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		PlayerInputComponent->BindAction("L_Kick_P1", IE_Pressed, this, &ACPP_Character::L_Kick);
 		PlayerInputComponent->BindAction("R_Kick_P1", IE_Pressed, this, &ACPP_Character::R_Kick);
 
-		PlayerInputComponent->BindAction("Uppercut_P1", IE_Pressed, this, &ACPP_Character::Uppercut);
-		PlayerInputComponent->BindAction("Skill_4", IE_Pressed, this, &ACPP_Character::Skill_4);
-		PlayerInputComponent->BindAction("ExceptionalAttack_P1", IE_Pressed, this, &ACPP_Character::StartExceptionalAttack);
+		PlayerInputComponent->BindAction("Skill_1_P1", IE_Pressed, this, &ACPP_Character::Skill_1);
+		PlayerInputComponent->BindAction("Skill_2_P1", IE_Pressed, this, &ACPP_Character::Skill_2);
+		PlayerInputComponent->BindAction("Skill_Ult_P1", IE_Pressed, this, &ACPP_Character::Skill_Ult);
+		//PlayerInputComponent->BindAction("ExceptionalAttack_P1", IE_Pressed, this, &ACPP_Character::StartExceptionalAttack);
 
 	}
 
@@ -240,17 +279,14 @@ void ACPP_Character::Landed()
 
 void ACPP_Character::L_Punch()
 {
-	if (characterCommands[0].hasUsedCommand && canMove && command_Check && characterState != ECharacterState::VE_Dead)
-	{
-		wasLightAttackUsed = true;
-		StartExceptionalAttack();
-	}
-	else if (l_punch && canMove && PK_Check && characterState != ECharacterState::VE_Dead)
+	
+	if (l_punch && canMove && PK_Check && characterState != ECharacterState::VE_Dead)
 	{
 		PlayAnimMontage(l_punch, 1, NAME_None);
 		DamageAmount = basicsDamageAmount;
 		PK_Check = false;
 	}
+	
 }
 
 void ACPP_Character::R_Punch()
@@ -271,42 +307,60 @@ void ACPP_Character::L_Kick()
 		DamageAmount = basicsDamageAmount;
 		PK_Check = false;
 	}
+	
+	
 }
 
 void ACPP_Character::R_Kick()
 {
-	if (characterCommands[2].hasUsedCommand && canMove && command_Check && characterState != ECharacterState::VE_Dead)
-	{
-		wasHeavyAttackUsed = true;
-		StartExceptionalAttack();
-	}
-	else if (r_kick && canMove && PK_Check && characterState != ECharacterState::VE_Dead)
+	
+	if (r_kick && canMove && PK_Check && characterState != ECharacterState::VE_Dead)
 	{
 		PlayAnimMontage(r_kick, 1, NAME_None);
 		DamageAmount = basicsDamageAmount;
 		PK_Check = false;
 	}
+	
 }
 
-void ACPP_Character::Uppercut()
+void ACPP_Character::Skill_1()
 {
-	if (canMove && command_Check && characterState != ECharacterState::VE_Dead)
+	if (skill_1 && canMove && PK_Check  && characterState != ECharacterState::VE_Dead && superMeterAmount >= 20.0f && canUseExAttack)
 	{
-		PlayAnimMontage(uppercut, 0.7f, NAME_None);
+		PlayAnimMontage(skill_1, 0.7f, NAME_None);
 		wasLightAttackUsed = true;
+		StartExceptionalAttack();
 		PK_Check = false;
-		DamageAmount = SkillDamageAmount_1;
+		//DamageAmount = SkillDamageAmount_1;
 		launchDistance = 500.0f;
 		characterCommands[0].hasUsedCommand = false;
 	}
 }
 
-void ACPP_Character::Skill_4()
+void ACPP_Character::Skill_2()
 {
-	if (skill_4 && canMove && characterState != ECharacterState::VE_Dead)
+	if (skill_2 && canMove && PK_Check && characterState != ECharacterState::VE_Dead && superMeterAmount >= 50.0f && canUseExAttack)
 	{
-		PlayAnimMontage(skill_4, 1, NAME_None);
+		PlayAnimMontage(skill_2, 1, NAME_None);
+		wasMediumAttackUsed = true;
+		StartExceptionalAttack();
+		PK_Check = false;
+		//DamageAmount = SkillDamageAmount_1;
+		launchDistance = 700.0f;
+		characterCommands[1].hasUsedCommand = false;
+	}
+}
+
+void ACPP_Character::Skill_Ult()
+{
+	if (skill_Ult && canMove && PK_Check && characterState != ECharacterState::VE_Dead && superMeterAmount >= 100.0f && canUseExAttack)
+	{
+		PlayAnimMontage(skill_Ult, 1, NAME_None);
 		wasHeavyAttackUsed = true;
+		StartExceptionalAttack();
+		PK_Check = false;
+		//DamageAmount = SkillDamageAmount_1;
+		characterCommands[2].hasUsedCommand = false;
 	}
 }
 
@@ -315,23 +369,21 @@ void ACPP_Character::StartExceptionalAttack()
 	if (wasLightAttackUsed && superMeterAmount >= 20.0f && canUseExAttack)
 	{
 		wasLightExAttackUsed = true;
-		Uppercut();
 		command_Check = false;
-		DamageAmount = 20.0f;
+		DamageAmount = 10.0f;
 		superMeterAmount -= 20.0f;
 	}
 	else if (wasMediumAttackUsed && superMeterAmount >= 50.0f && canUseExAttack)
 	{
 		wasMediumExAttackUsed = true;
-		DamageAmount = 25.0f;
+		DamageAmount = 15.0f;
 		superMeterAmount -= 50.0f;
 	}
 	else if (wasHeavyAttackUsed && superMeterAmount >= 90.0f && canUseExAttack)
 	{
 		wasHeavyExAttackUsed = true;
-		Skill_4();
 		command_Check = false;
-		DamageAmount = 15.0f;
+		DamageAmount = 7.5f;
 		superMeterAmount -= 100.0f;
 	}
 
@@ -539,14 +591,24 @@ void ACPP_Character::StopJump_P2()
 	StopJumping();
 }
 
-void ACPP_Character::Uppercut_P2()
-{
-	Uppercut();
-}
-
 void ACPP_Character::StartExceptionalAttack_P2()
 {
 	StartExceptionalAttack();
+}
+
+void ACPP_Character::Skill_1_P2()
+{
+	Skill_1();
+}
+
+void ACPP_Character::Skill_2_P2()
+{
+	Skill_2();
+}
+
+void ACPP_Character::Skill_Ult_P2()
+{
+	Skill_Ult();
 }
 
 //fight interface funcions
@@ -666,7 +728,7 @@ void ACPP_Character::AddToInputMap(FString _input, EInputType _type)
 
 void ACPP_Character::AddInputToInputBuffer(FInputInfo _inputInfo)
 {
-	/*if (!isFlipped)
+	if (!isFlipped)
 	{
 		if (_inputInfo.inputType == EInputType::E_Forward)
 		{
@@ -676,7 +738,7 @@ void ACPP_Character::AddInputToInputBuffer(FInputInfo _inputInfo)
 		{
 			_inputInfo.inputType = EInputType::E_Forward;
 		}
-	}*/
+	}
 
 	inputBuffer.Add(_inputInfo);
 	CheckInputBufferForCommandUsingType();
