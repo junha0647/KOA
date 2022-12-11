@@ -400,6 +400,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void WinRound();
 
+	UFUNCTION(BlueprintImplementableEvent)
+		void AddInputIconToScreen(int iconIndex, bool addInput = true);
+
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 		void NotifyRoundStart();
 
