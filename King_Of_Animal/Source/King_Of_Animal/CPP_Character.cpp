@@ -489,7 +489,7 @@ void ACPP_Character::TakeDamage(float damageAmount, float hitstunTime, float blo
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Damege"));
 			MaxHealth -= damageAmount;
-			superMeterAmount += damageAmount * 5.85f;
+			superMeterAmount += damageAmount * 1.0f;
 
 			stunTime = hitstunTime;
 
@@ -509,7 +509,7 @@ void ACPP_Character::TakeDamage(float damageAmount, float hitstunTime, float blo
 				PerformPushback(pushbackAmount, launchAmount, false);
 				if (!opponent->wasLightExAttackUsed)
 				{
-					opponent->superMeterAmount += damageAmount * 3.0f;
+					opponent->superMeterAmount += damageAmount * 2.0f;
 				}
 			}
 
@@ -519,7 +519,7 @@ void ACPP_Character::TakeDamage(float damageAmount, float hitstunTime, float blo
 			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Blocking"));
 			float reducedDamage = damageAmount * 0.30f;
 			MaxHealth -= reducedDamage;
-			superMeterAmount += damageAmount * 4.0f;
+			superMeterAmount += damageAmount * 1.5f;
 
 			stunTime = blockstunTime;
 
@@ -535,7 +535,7 @@ void ACPP_Character::TakeDamage(float damageAmount, float hitstunTime, float blo
 			if (!opponent->wasLightExAttackUsed)
 			{
 				// 이거 잘모르겠음
-				opponent->superMeterAmount += damageAmount * 0.15f;
+				opponent->superMeterAmount += damageAmount * 1.15f;
 			}
 			/*
 			if (opponent)
