@@ -6,7 +6,8 @@
 
 AKing_Of_AnimalGameMode::AKing_Of_AnimalGameMode()
 {
-	countTime = 99;
+	numRound = 2;
+	countTime = 10;
 
 	// set default pawn class to our Blueprinted character
 	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/SideScrollerCPP/Blueprints/SideScrollerCharacter"));
