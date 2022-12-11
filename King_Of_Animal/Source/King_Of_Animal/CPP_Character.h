@@ -61,9 +61,6 @@ public:
 	TArray<EInputType> inputTypes;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	TArray<FString> inputs;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	bool hasUsedCommand;
 };
 
@@ -81,6 +78,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	float timeStamp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	bool wasUsed;
 };
 
 /*
