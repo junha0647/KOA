@@ -25,11 +25,14 @@ public:
 
 	void CountDown();
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "Count")
+	UFUNCTION(BlueprintImplementableEvent, Category = "GameMode Settings")
 		void CountFinished();
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameMode Settings")
 		int32 countTime;
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "GameMode Settings")
+		int32 numRound;	
 
 	FTimerHandle TimerHand;
 };

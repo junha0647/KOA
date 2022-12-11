@@ -24,6 +24,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player References")
 		ECharacterClass P2characterClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameInstance References")
+		int32 countTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameInstance References")
+		int32 numRound;
+
 	// Is the device intended to be used for multiple players
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Controller")
 	bool isDeviceForMultiplePlayers;
