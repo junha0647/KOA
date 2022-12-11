@@ -27,7 +27,9 @@ enum class ECharacterState : uint8
 	VE_Dead          UMETA(DisplayName = "DEAD"),
 	VE_Launched      UMETA(DisplayName = "LAUNCHED"),
 	VE_KnockedDown   UMETA(DisplayName = "KNOCKED DOWN"),
-	VE_Recovery      UMETA(DisplayName = "RECOVERY")
+	VE_Recovery      UMETA(DisplayName = "RECOVERY"),
+	VE_WallBounce    UMETA(DisplayName = "WALL BOUNCED"),
+	VE_GroundBounce  UMETA(DisplayName = "GROUND BOUNCED")
 };
 
 /*
@@ -308,6 +310,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input Stack")
 	bool isPlayerOne;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	bool shouldGroundBounce;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	bool shouldWallBounce;
+
 	// The amount of health the character currently has.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 	float MaxHealth;
@@ -360,6 +368,7 @@ public:
 
 public:
 	FName hitBone;
+	FName hitBone2;
 	
 	// The timer handle for all stuns
 	FTimerHandle stunTimerHandle;

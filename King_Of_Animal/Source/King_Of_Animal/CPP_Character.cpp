@@ -60,6 +60,9 @@ ACPP_Character::ACPP_Character()
 	IsDie = false;
 	isCrouching = false;
 	isuppercut = false;
+
+	shouldGroundBounce = false;
+	shouldWallBounce = false;
 }
 
 // Called when the game starts or when spawned
@@ -72,7 +75,7 @@ void ACPP_Character::BeginPlay()
 void ACPP_Character::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (characterState != ECharacterState::VE_Jumping && characterState != ECharacterState::VE_Dead) {
+	if (characterState != ECharacterState::VE_Jumping && characterState != ECharacterState::VE_Dead && characterState != ECharacterState::VE_WallBounce) {
 		if (opponent)
 		{
 			if (auto characterMovement = GetCharacterMovement())
@@ -209,7 +212,7 @@ void ACPP_Character::MoveRight(float axis)
 
 void ACPP_Character::Jump()
 {
-	if (canMove && characterState != ECharacterState::VE_Dead && characterState != ECharacterState::VE_Launched && characterState != ECharacterState::VE_KnockedDown && characterState != ECharacterState::VE_Recovery)
+	if (canMove && !isCrouching && characterState != ECharacterState::VE_Dead && characterState != ECharacterState::VE_Launched && characterState != ECharacterState::VE_KnockedDown && characterState != ECharacterState::VE_Recovery && characterState != ECharacterState::VE_WallBounce && characterState != ECharacterState::VE_GroundBounce)
 	{
 		ACharacter::Jump();
 		characterState = ECharacterState::VE_Jumping;
@@ -553,20 +556,23 @@ void ACPP_Character::CheckPunch_Implementation(bool is_leftHand)
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("check punch"));
 
 	FVector handLocation;
+	FVector handLocation2;
 	if (is_leftHand)
 	{
 		handLocation = GetMesh()->GetBoneLocation("LeftHand", EBoneSpaces::WorldSpace);
+		handLocation2 = GetMesh()->GetBoneLocation("LeftForeArm", EBoneSpaces::WorldSpace);
 	}
 	else
 	{
 		handLocation = GetMesh()->GetBoneLocation("RightHand", EBoneSpaces::WorldSpace);
+		handLocation2 = GetMesh()->GetBoneLocation("RightForeArm", EBoneSpaces::WorldSpace);
 	}
 
 
 	hitBone = opponent->GetClosestBone(handLocation, 80);
+	hitBone2 = opponent->GetClosestBone(handLocation2, 80);
 
-
-	if (hitBone != "" && canMove && !opponent->isuppercut)
+	if ((hitBone != "" || hitBone2 != "") && canMove && !opponent->isuppercut)
 	{
 		opponent->TakeDamage(DamageAmount, 0.3f, 0.3f, pushbackDistance, launchDistance);
 	}
@@ -577,20 +583,23 @@ void ACPP_Character::CheckKick_Implementation(bool is_leftLeg)
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("check kick"));
 
 	FVector LegLocation;
+	FVector LegLocation2;
 	if (is_leftLeg)
 	{
 		LegLocation = GetMesh()->GetBoneLocation("LeftToe_End", EBoneSpaces::WorldSpace);
+		LegLocation2 = GetMesh()->GetBoneLocation("LeftFoot", EBoneSpaces::WorldSpace);
 	}
 	else
 	{
 		LegLocation = GetMesh()->GetBoneLocation("RightToe_End", EBoneSpaces::WorldSpace);
+		LegLocation2 = GetMesh()->GetBoneLocation("RightFoot", EBoneSpaces::WorldSpace);
 	}
 
 
 	hitBone = opponent->GetClosestBone(LegLocation, 80);
+	hitBone2 = opponent->GetClosestBone(LegLocation2, 80);
 
-
-	if (hitBone != "" && canMove && !opponent->isuppercut)
+	if ((hitBone != "" || hitBone2 != "") && canMove && !opponent->isuppercut)
 	{
 		opponent->TakeDamage(DamageAmount, 0.3f, 0.3f, pushbackDistance, launchDistance);
 	}
