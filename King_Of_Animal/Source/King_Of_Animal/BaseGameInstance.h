@@ -20,7 +20,10 @@ class KING_OF_ANIMAL_API UBaseGameInstance : public UGameInstance
 	GENERATED_BODY()
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player References")
-	ECharacterClass characterClass;
+		ECharacterClass P1characterClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player References")
+		ECharacterClass P2characterClass;
 
 	// Is the device intended to be used for multiple players
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Controller")
