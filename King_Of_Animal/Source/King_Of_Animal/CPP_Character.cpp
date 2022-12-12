@@ -288,7 +288,6 @@ void ACPP_Character::L_Punch()
 	}
 	
 }
-
 void ACPP_Character::R_Punch()
 {
 	if (r_punch && canMove && PK_Check && characterState != ECharacterState::VE_Dead)
@@ -298,7 +297,6 @@ void ACPP_Character::R_Punch()
 		PK_Check = false;
 	}
 }
-
 void ACPP_Character::L_Kick()
 {
 	if (l_kick && canMove && PK_Check && characterState != ECharacterState::VE_Dead)
@@ -310,7 +308,6 @@ void ACPP_Character::L_Kick()
 	
 	
 }
-
 void ACPP_Character::R_Kick()
 {
 	
@@ -322,7 +319,6 @@ void ACPP_Character::R_Kick()
 	}
 	
 }
-
 void ACPP_Character::Skill_1()
 {
 	if (skill_1 && canMove && PK_Check  && characterState != ECharacterState::VE_Dead && superMeterAmount >= 20.0f && canUseExAttack)
@@ -336,7 +332,6 @@ void ACPP_Character::Skill_1()
 		characterCommands[0].hasUsedCommand = false;
 	}
 }
-
 void ACPP_Character::Skill_2()
 {
 	if (skill_2 && canMove && PK_Check && characterState != ECharacterState::VE_Dead && superMeterAmount >= 50.0f && canUseExAttack)
@@ -350,7 +345,6 @@ void ACPP_Character::Skill_2()
 		characterCommands[1].hasUsedCommand = false;
 	}
 }
-
 void ACPP_Character::Skill_Ult()
 {
 	if (skill_Ult && canMove && PK_Check && characterState != ECharacterState::VE_Dead && superMeterAmount >= 100.0f && canUseExAttack)
@@ -785,49 +779,6 @@ void ACPP_Character::CheckInputBufferForCommand()
 
 void ACPP_Character::CheckInputBufferForCommandUsingType()
 {
-	//int correctSequenceCounter = 0;
-
-	//for (auto currentCommand : characterCommands)
-	//{
-	//	for (int input = 0; input < inputBuffer.Num(); ++input)
-	//	{
-	//		inputBuffer[input].wasUsed = false; // wasUsed´Â ¹«½¼ º¯¼ö?
-	//	}
-
-	//	for (int commandInput = 0; commandInput < currentCommand.inputTypes.Num(); ++commandInput)
-	//	{
-	//		for (int input = 0; input < inputBuffer.Num(); ++input)
-	//		{
-	//			if (input + correctSequenceCounter < inputBuffer.Num())
-	//			{
-	//				if (!inputBuffer[input + correctSequenceCounter].wasUsed && inputBuffer[input + correctSequenceCounter].inputType == (currentCommand.inputTypes[commandInput]))
-	//				{
-	//					//UE_LOG(LogTemp, Warning, TEXT("The player added another input to the command sequence."));
-	//					inputBuffer[input + correctSequenceCounter].wasUsed = true;
-	//					++correctSequenceCounter;
-
-	//					if (correctSequenceCounter == currentCommand.inputTypes.Num())
-	//					{
-	//						StartCommand(currentCommand.name);
-	//						correctSequenceCounter = 0;
-	//					}
-	//					break;
-	//				}
-	//				else
-	//				{
-	//					//UE_LOG(LogTemp, Warning, TEXT("The player broke the command sequence."));
-	//					correctSequenceCounter = 0;
-	//				}
-	//			}
-	//			else
-	//			{
-	//				//UE_LOG(LogTemp, Warning, TEXT("The player is not yet finished with the command sequence."));
-	//				correctSequenceCounter = 0;
-	//			}
-	//		}
-	//	}
-	//}
-
 	int correctSequenceCounter = 0;
 
 	for (auto currentCommand : characterCommands)
@@ -863,6 +814,49 @@ void ACPP_Character::CheckInputBufferForCommandUsingType()
 			}
 		}
 	}
+
+	//int correctSequenceCounter = 0;
+
+//for (auto currentCommand : characterCommands)
+//{
+//	for (int input = 0; input < inputBuffer.Num(); ++input)
+//	{
+//		inputBuffer[input].wasUsed = false; // wasUsed´Â ¹«½¼ º¯¼ö?
+//	}
+
+//	for (int commandInput = 0; commandInput < currentCommand.inputTypes.Num(); ++commandInput)
+//	{
+//		for (int input = 0; input < inputBuffer.Num(); ++input)
+//		{
+//			if (input + correctSequenceCounter < inputBuffer.Num())
+//			{
+//				if (!inputBuffer[input + correctSequenceCounter].wasUsed && inputBuffer[input + correctSequenceCounter].inputType == (currentCommand.inputTypes[commandInput]))
+//				{
+//					//UE_LOG(LogTemp, Warning, TEXT("The player added another input to the command sequence."));
+//					inputBuffer[input + correctSequenceCounter].wasUsed = true;
+//					++correctSequenceCounter;
+
+//					if (correctSequenceCounter == currentCommand.inputTypes.Num())
+//					{
+//						StartCommand(currentCommand.name);
+//						correctSequenceCounter = 0;
+//					}
+//					break;
+//				}
+//				else
+//				{
+//					//UE_LOG(LogTemp, Warning, TEXT("The player broke the command sequence."));
+//					correctSequenceCounter = 0;
+//				}
+//			}
+//			else
+//			{
+//				//UE_LOG(LogTemp, Warning, TEXT("The player is not yet finished with the command sequence."));
+//				correctSequenceCounter = 0;
+//			}
+//		}
+//	}
+//}
 }
 
 void ACPP_Character::StartCommand(FString _commandName)
